@@ -9,6 +9,7 @@ const useUserStore = create((set, get) => ({
   loading: false,
   isLoading: false,
   error: null,
+  dashboard: {},
 
 
   fetchProfile: async () => {
@@ -106,6 +107,22 @@ const useUserStore = create((set, get) => ({
         students,
       }));
       return students;
+    } catch (error) {
+      set({ error: error.message || "Failed to fetch consultants" });
+      throw error;
+    } finally {
+      set({ isLoading: false });
+    }
+  },
+  
+  fetchSuperAdminDashboard: async () => {
+    set({ isLoading: true, error: null });
+    try {
+      const data = await userService.getSuperAdminDashboardData();
+      set((state) => ({
+        dashboard: data,
+      }));
+      return data;
     } catch (error) {
       set({ error: error.message || "Failed to fetch consultants" });
       throw error;

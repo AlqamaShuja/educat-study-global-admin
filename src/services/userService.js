@@ -82,6 +82,21 @@ const userService = {
    * Get all staff members
    * @returns {Promise<Array>} List of staff objects
    */
+  getSuperAdminDashboardData: async () => {
+    try {
+      const response = await api.get("/super-admin/dashboard");
+      console.log(response, "akcsnaskncacnsnc");
+      
+      return response.data;
+    } catch (error) {
+      throw new Error(error.response?.data?.message || "Failed to fetch staff");
+    }
+  },
+  
+  /**
+   * Get all staff members
+   * @returns {Promise<Array>} List of staff objects
+   */
   getAllStaff: async () => {
     try {
       const response = await api.get("/super-admin/staff");
