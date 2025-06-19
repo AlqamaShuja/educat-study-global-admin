@@ -11,7 +11,7 @@ node_modules
 dist
 dist-ssr
 *.local
-
+study_global_admin_front.pem
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
