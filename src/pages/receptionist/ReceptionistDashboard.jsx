@@ -22,7 +22,7 @@ import {
   Clock,
   Shield,
   Plus,
-} from 'lucid-react';
+} from 'lucide-react';
 
 const ReceptionistDashboard = () => {
   const { user } = useAuth();

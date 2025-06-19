@@ -7,7 +7,7 @@ import { Link } from "react-router-dom";
 import Card from "../../components/ui/Card";
 import Button from "../../components/ui/Button";
 import Badge from "../../components/ui/Badge";
-import Modal from "../../components/modal/Modal";
+// import Modal from "../../components/modal/Modal";
 import Input from "../../components/ui/Input";
 import Select from "../../components/ui/Select";
 import LoadingSpinner from "../../components/ui/LoadingSpinner";
@@ -25,6 +25,7 @@ import {
   Edit,
   Trash2,
 } from "lucide-react";
+import Modal from "../../components/ui/Modal";
 
 const WalkInRegistration = () => {
   const { user } = useAuth();

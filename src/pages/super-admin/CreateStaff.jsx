@@ -1,16 +1,16 @@
-import React, { useState, useEffect } from "react";
-import useApi from "../../hooks/useApi";
-import useAuth from "../../hooks/useAuth";
-import usePermissions from "../../hooks/usePermissions";
-import { validateStaffForm, validateInput } from "../../utils/validators";
-import Card from "../../components/ui/Card";
-import Button from "../../components/ui/Button";
-import Badge from "../../components/ui/Badge";
-import Input from "../../components/ui/Input";
-import Select from "../../components/ui/Select";
-import LoadingSpinner from "../../components/ui/LoadingSpinner";
-import Toast from "../../components/ui/Toast";
-import DataTable from "../../components/tables/DataTable";
+import React, { useState, useEffect } from 'react';
+import useApi from '../../hooks/useApi';
+import useAuth from '../../hooks/useAuth';
+import usePermissions from '../../hooks/usePermissions';
+import { validateStaffForm, validateInput } from '../../utils/validators';
+import Card from '../../components/ui/Card';
+import Button from '../../components/ui/Button';
+import Badge from '../../components/ui/Badge';
+import Input from '../../components/ui/Input';
+import Select from '../../components/ui/Select';
+import LoadingSpinner from '../../components/ui/LoadingSpinner';
+import Toast from '../../components/ui/Toast';
+import DataTable from '../../components/tables/DataTable';
 import {
   User,
   Plus,
@@ -21,7 +21,7 @@ import {
   Building,
   Shield,
   Lock,
-} from "@lucide/react";
+} from 'lucide-react';
 
 const CreateStaff = () => {
   const { user } = useAuth();
@@ -30,42 +30,42 @@ const CreateStaff = () => {
   const [staff, setStaff] = useState([]);
   const [offices, setOffices] = useState([]);
   const [filters, setFilters] = useState({
-    search: "",
-    role: "",
-    officeId: "",
+    search: '',
+    role: '',
+    officeId: '',
   });
   const [showForm, setShowForm] = useState(false);
   const [editStaff, setEditStaff] = useState(null);
   const [formErrors, setFormErrors] = useState({});
   const [toast, setToast] = useState({
     show: false,
-    message: "",
-    type: "success",
+    message: '',
+    type: 'success',
   });
 
   const [staffForm, setStaffForm] = useState({
-    name: "",
-    email: "",
-    password: "",
-    role: "",
-    officeId: "",
-    status: "active",
+    name: '',
+    email: '',
+    password: '',
+    role: '',
+    officeId: '',
+    status: 'active',
   });
 
   const roleOptions = [
-    { value: "manager", label: "Manager" },
-    { value: "receptionist", label: "Receptionist" },
-    { value: "consultant", label: "Consultant" },
-    { value: "instructor", label: "Instructor" },
+    { value: 'manager', label: 'Manager' },
+    { value: 'receptionist', label: 'Receptionist' },
+    { value: 'consultant', label: 'Consultant' },
+    { value: 'instructor', label: 'Instructor' },
   ];
 
   const statusOptions = [
-    { value: "active", label: "Active", color: "bg-green-100 text-green-800" },
-    { value: "inactive", label: "Inactive", color: "bg-red-100 text-red-800" },
+    { value: 'active', label: 'Active', color: 'bg-green-100 text-green-800' },
+    { value: 'inactive', label: 'Inactive', color: 'bg-red-100 text-red-800' },
   ];
 
   useEffect(() => {
-    if (user && hasPermission("manage", "staff")) {
+    if (user && hasPermission('manage', 'staff')) {
       fetchOffices();
       fetchStaff();
     }
@@ -73,7 +73,7 @@ const CreateStaff = () => {
 
   const fetchOffices = async () => {
     try {
-      const response = await callApi("GET", "/super-admin/offices");
+      const response = await callApi('GET', '/super-admin/offices');
       setOffices(
         response?.map((office) => ({
           id: office.id,
@@ -83,23 +83,23 @@ const CreateStaff = () => {
     } catch (error) {
       setToast({
         show: true,
-        message: apiError || "Failed to fetch offices",
-        type: "error",
+        message: apiError || 'Failed to fetch offices',
+        type: 'error',
       });
     }
   };
 
   const fetchStaff = async () => {
     try {
-      const response = await callApi("GET", "/super-admin/staff");
+      const response = await callApi('GET', '/super-admin/staff');
       setStaff(
         response?.map((member) => ({
           id: member.id,
-          name: validateInput(member.name || "Unknown"),
-          email: validateInput(member.email || "N/A"),
+          name: validateInput(member.name || 'Unknown'),
+          email: validateInput(member.email || 'N/A'),
           role: member.role,
           officeId: member.officeId,
-          officeName: validateInput(member.officeName || "Unassigned"),
+          officeName: validateInput(member.officeName || 'Unassigned'),
           status: member.status,
           createdAt: member.createdAt,
         })) || []
@@ -107,8 +107,8 @@ const CreateStaff = () => {
     } catch (error) {
       setToast({
         show: true,
-        message: apiError || "Failed to fetch staff",
-        type: "error",
+        message: apiError || 'Failed to fetch staff',
+        type: 'error',
       });
     }
   };
@@ -135,7 +135,7 @@ const CreateStaff = () => {
 
       if (editStaff) {
         const updatedStaff = await callApi(
-          "PUT",
+          'PUT',
           `/super-admin/staff/${editStaff.id}`,
           payload
         );
@@ -146,16 +146,16 @@ const CreateStaff = () => {
         );
         setToast({
           show: true,
-          message: "Staff updated successfully!",
-          type: "success",
+          message: 'Staff updated successfully!',
+          type: 'success',
         });
       } else {
-        const newStaff = await callApi("POST", "/super-admin/staff", payload);
+        const newStaff = await callApi('POST', '/super-admin/staff', payload);
         setStaff((prev) => [...prev, newStaff]);
         setToast({
           show: true,
-          message: "Staff created successfully!",
-          type: "success",
+          message: 'Staff created successfully!',
+          type: 'success',
         });
       }
 
@@ -165,41 +165,41 @@ const CreateStaff = () => {
     } catch (error) {
       setToast({
         show: true,
-        message: apiError || "Failed to save staff",
-        type: "error",
+        message: apiError || 'Failed to save staff',
+        type: 'error',
       });
     }
   };
 
   const handleDeleteStaff = async (staffId) => {
-    if (!window.confirm("Are you sure you want to delete this staff member?"))
+    if (!window.confirm('Are you sure you want to delete this staff member?'))
       return;
 
     try {
-      await callApi("DELETE", `/super-admin/staff/${staffId}`);
+      await callApi('DELETE', `/super-admin/staff/${staffId}`);
       setStaff((prev) => prev.filter((member) => member.id !== staffId));
       setToast({
         show: true,
-        message: "Staff deleted successfully!",
-        type: "success",
+        message: 'Staff deleted successfully!',
+        type: 'success',
       });
     } catch (error) {
       setToast({
         show: true,
-        message: apiError || "Failed to delete staff",
-        type: "error",
+        message: apiError || 'Failed to delete staff',
+        type: 'error',
       });
     }
   };
 
   const resetForm = () => {
     setStaffForm({
-      name: "",
-      email: "",
-      password: "",
-      role: "",
-      officeId: "",
-      status: "active",
+      name: '',
+      email: '',
+      password: '',
+      role: '',
+      officeId: '',
+      status: 'active',
     });
     setFormErrors({});
   };
@@ -217,49 +217,49 @@ const CreateStaff = () => {
 
   const getStatusColor = (status) =>
     statusOptions.find((s) => s.value === status)?.color ||
-    "bg-gray-100 text-gray-800";
+    'bg-gray-100 text-gray-800';
 
   const columns = [
     {
-      key: "name",
-      label: "Name",
+      key: 'name',
+      label: 'Name',
       render: (member) => (
-        <div className="flex items-center">
-          <User className="h-4 w-4 text-gray-400 mr-2" />
-          <span className="text-sm">{member.name}</span>
+        <div className='flex items-center'>
+          <User className='h-4 w-4 text-gray-400 mr-2' />
+          <span className='text-sm'>{member.name}</span>
         </div>
       ),
     },
     {
-      key: "email",
-      label: "Email",
+      key: 'email',
+      label: 'Email',
       render: (member) => (
-        <div className="flex items-center">
-          <Mail className="h-4 w-4 text-gray-400 mr-2" />
-          <span className="text-sm">{member.email}</span>
+        <div className='flex items-center'>
+          <Mail className='h-4 w-4 text-gray-400 mr-2' />
+          <span className='text-sm'>{member.email}</span>
         </div>
       ),
     },
     {
-      key: "role",
-      label: "Role",
+      key: 'role',
+      label: 'Role',
       render: (member) => (
-        <span className="text-sm capitalize">{member.role}</span>
+        <span className='text-sm capitalize'>{member.role}</span>
       ),
     },
     {
-      key: "officeName",
-      label: "Office",
+      key: 'officeName',
+      label: 'Office',
       render: (member) => (
-        <div className="flex items-center">
-          <Building className="h-4 w-4 text-gray-400 mr-2" />
-          <span className="text-sm">{member.officeName}</span>
+        <div className='flex items-center'>
+          <Building className='h-4 w-4 text-gray-400 mr-2' />
+          <span className='text-sm'>{member.officeName}</span>
         </div>
       ),
     },
     {
-      key: "status",
-      label: "Status",
+      key: 'status',
+      label: 'Status',
       render: (member) => (
         <Badge className={getStatusColor(member.status)}>
           {statusOptions.find((s) => s.value === member.status)?.label}
@@ -267,47 +267,47 @@ const CreateStaff = () => {
       ),
     },
     {
-      key: "createdAt",
-      label: "Created At",
+      key: 'createdAt',
+      label: 'Created At',
       render: (member) => (
-        <div className="flex items-center text-sm text-gray-600">
-          <Clock className="h-4 w-4 mr-1" />
+        <div className='flex items-center text-sm text-gray-600'>
+          <Clock className='h-4 w-4 mr-1' />
           {new Date(member.createdAt).toLocaleString()}
         </div>
       ),
     },
     {
-      key: "actions",
-      label: "Actions",
+      key: 'actions',
+      label: 'Actions',
       render: (member) => (
-        <div className="flex space-x-2">
+        <div className='flex space-x-2'>
           <Button
-            size="sm"
-            variant="outline"
+            size='sm'
+            variant='outline'
             onClick={() => {
               setEditStaff(member);
               setStaffForm({
                 name: member.name,
                 email: member.email,
-                password: "",
+                password: '',
                 role: member.role,
-                officeId: member.officeId || "",
+                officeId: member.officeId || '',
                 status: member.status,
               });
               setShowForm(true);
             }}
-            disabled={!hasPermission("edit", "staff")}
+            disabled={!hasPermission('edit', 'staff')}
           >
-            <Edit className="h-4 w-4" />
+            <Edit className='h-4 w-4' />
           </Button>
           <Button
-            size="sm"
-            variant="outline"
+            size='sm'
+            variant='outline'
             onClick={() => handleDeleteStaff(member.id)}
-            className="border-red-300 text-red-600 hover:bg-red-50"
-            disabled={!hasPermission("delete", "staff")}
+            className='border-red-300 text-red-600 hover:bg-red-50'
+            disabled={!hasPermission('delete', 'staff')}
           >
-            <Trash2 className="h-4 w-4" />
+            <Trash2 className='h-4 w-4' />
           </Button>
         </div>
       ),
@@ -316,20 +316,20 @@ const CreateStaff = () => {
 
   if (apiLoading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <LoadingSpinner size="lg" />
+      <div className='flex items-center justify-center h-64'>
+        <LoadingSpinner size='lg' />
       </div>
     );
   }
 
-  if (!hasPermission("manage", "staff")) {
+  if (!hasPermission('manage', 'staff')) {
     return (
-      <div className="text-center py-8">
-        <Shield className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-        <h3 className="text-lg font-medium text-gray-900 mb-2">
+      <div className='text-center py-8'>
+        <Shield className='h-12 w-12 text-gray-400 mx-auto mb-4' />
+        <h3 className='text-lg font-medium text-gray-900 mb-2'>
           Access Denied
         </h3>
-        <p className="text-gray-600">
+        <p className='text-gray-600'>
           You do not have permission to manage staff.
         </p>
       </div>
@@ -337,7 +337,7 @@ const CreateStaff = () => {
   }
 
   return (
-    <div className="space-y-6">
+    <div className='space-y-6'>
       <Toast
         isOpen={toast.show}
         message={toast.message}
@@ -346,10 +346,10 @@ const CreateStaff = () => {
       />
 
       {/* Header */}
-      <div className="flex justify-between items-center">
+      <div className='flex justify-between items-center'>
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Staff Management</h1>
-          <p className="text-gray-600">Create and manage staff accounts.</p>
+          <h1 className='text-2xl font-bold text-gray-900'>Staff Management</h1>
+          <p className='text-gray-600'>Create and manage staff accounts.</p>
         </div>
         <Button
           onClick={() => {
@@ -357,22 +357,22 @@ const CreateStaff = () => {
             setEditStaff(null);
             resetForm();
           }}
-          disabled={!hasPermission("create", "staff")}
+          disabled={!hasPermission('create', 'staff')}
         >
-          <Plus className="h-4 w-4 mr-2" />
+          <Plus className='h-4 w-4 mr-2' />
           Create Staff
         </Button>
       </div>
 
       {/* Staff Form */}
       {showForm && (
-        <Card className="p-4">
-          <h3 className="text-lg font-semibold mb-4">
-            {editStaff ? "Edit Staff" : "Create Staff"}
+        <Card className='p-4'>
+          <h3 className='text-lg font-semibold mb-4'>
+            {editStaff ? 'Edit Staff' : 'Create Staff'}
           </h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className='block text-sm font-medium text-gray-700 mb-2'>
                 Name *
               </label>
               <Input
@@ -380,53 +380,53 @@ const CreateStaff = () => {
                 onChange={(e) =>
                   setStaffForm({ ...staffForm, name: e.target.value })
                 }
-                placeholder="Enter staff name"
-                className={formErrors.name ? "border-red-500" : ""}
+                placeholder='Enter staff name'
+                className={formErrors.name ? 'border-red-500' : ''}
               />
               {formErrors.name && (
-                <p className="text-red-500 text-xs mt-1">{formErrors.name}</p>
+                <p className='text-red-500 text-xs mt-1'>{formErrors.name}</p>
               )}
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className='block text-sm font-medium text-gray-700 mb-2'>
                 Email *
               </label>
               <Input
-                type="email"
+                type='email'
                 value={staffForm.email}
                 onChange={(e) =>
                   setStaffForm({ ...staffForm, email: e.target.value })
                 }
-                placeholder="Enter staff email"
-                className={formErrors.email ? "border-red-500" : ""}
+                placeholder='Enter staff email'
+                className={formErrors.email ? 'border-red-500' : ''}
               />
               {formErrors.email && (
-                <p className="text-red-500 text-xs mt-1">{formErrors.email}</p>
+                <p className='text-red-500 text-xs mt-1'>{formErrors.email}</p>
               )}
             </div>
             {!editStaff && (
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className='block text-sm font-medium text-gray-700 mb-2'>
                   Password *
                 </label>
                 <Input
-                  type="password"
+                  type='password'
                   value={staffForm.password}
                   onChange={(e) =>
                     setStaffForm({ ...staffForm, password: e.target.value })
                   }
-                  placeholder="Enter password"
-                  className={formErrors.password ? "border-red-500" : ""}
+                  placeholder='Enter password'
+                  className={formErrors.password ? 'border-red-500' : ''}
                 />
                 {formErrors.password && (
-                  <p className="text-red-500 text-xs mt-1">
+                  <p className='text-red-500 text-xs mt-1'>
                     {formErrors.password}
                   </p>
                 )}
               </div>
             )}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className='block text-sm font-medium text-gray-700 mb-2'>
                 Role *
               </label>
               <Select
@@ -435,19 +435,19 @@ const CreateStaff = () => {
                 onChange={(value) =>
                   setStaffForm({ ...staffForm, role: value })
                 }
-                className={formErrors.role ? "border-red-500" : ""}
+                className={formErrors.role ? 'border-red-500' : ''}
               />
               {formErrors.role && (
-                <p className="text-red-500 text-xs mt-1">{formErrors.role}</p>
+                <p className='text-red-500 text-xs mt-1'>{formErrors.role}</p>
               )}
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className='block text-sm font-medium text-gray-700 mb-2'>
                 Office
               </label>
               <Select
                 options={[
-                  { value: "", label: "Unassigned" },
+                  { value: '', label: 'Unassigned' },
                   ...offices.map((office) => ({
                     value: office.id,
                     label: office.name,
@@ -457,16 +457,16 @@ const CreateStaff = () => {
                 onChange={(value) =>
                   setStaffForm({ ...staffForm, officeId: value })
                 }
-                className={formErrors.officeId ? "border-red-500" : ""}
+                className={formErrors.officeId ? 'border-red-500' : ''}
               />
               {formErrors.officeId && (
-                <p className="text-red-500 text-xs mt-1">
+                <p className='text-red-500 text-xs mt-1'>
                   {formErrors.officeId}
                 </p>
               )}
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className='block text-sm font-medium text-gray-700 mb-2'>
                 Status *
               </label>
               <Select
@@ -478,16 +478,16 @@ const CreateStaff = () => {
                 onChange={(value) =>
                   setStaffForm({ ...staffForm, status: value })
                 }
-                className={formErrors.status ? "border-red-500" : ""}
+                className={formErrors.status ? 'border-red-500' : ''}
               />
               {formErrors.status && (
-                <p className="text-red-500 text-xs mt-1">{formErrors.status}</p>
+                <p className='text-red-500 text-xs mt-1'>{formErrors.status}</p>
               )}
             </div>
           </div>
-          <div className="flex justify-end space-x-3 mt-6">
+          <div className='flex justify-end space-x-3 mt-6'>
             <Button
-              variant="outline"
+              variant='outline'
               onClick={() => {
                 setShowForm(false);
                 setEditStaff(null);
@@ -497,34 +497,34 @@ const CreateStaff = () => {
               Cancel
             </Button>
             <Button onClick={handleSaveStaff}>
-              {editStaff ? "Update Staff" : "Create Staff"}
+              {editStaff ? 'Update Staff' : 'Create Staff'}
             </Button>
           </div>
         </Card>
       )}
 
       {/* Filters */}
-      <Card className="p-4">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+      <Card className='p-4'>
+        <div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
+          <div className='relative'>
+            <Search className='absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400' />
             <Input
-              placeholder="Search by name or email..."
+              placeholder='Search by name or email...'
               value={filters.search}
               onChange={(e) =>
                 setFilters({ ...filters, search: e.target.value })
               }
-              className="pl-10"
+              className='pl-10'
             />
           </div>
           <Select
-            options={[{ value: "", label: "All Roles" }, ...roleOptions]}
+            options={[{ value: '', label: 'All Roles' }, ...roleOptions]}
             value={filters.role}
             onChange={(value) => setFilters({ ...filters, role: value })}
           />
           <Select
             options={[
-              { value: "", label: "All Offices" },
+              { value: '', label: 'All Offices' },
               ...offices.map((office) => ({
                 value: office.id,
                 label: office.name,
@@ -537,18 +537,18 @@ const CreateStaff = () => {
       </Card>
 
       {/* Staff Table */}
-      <Card className="p-4">
-        <h3 className="text-lg font-semibold mb-4">Staff List</h3>
+      <Card className='p-4'>
+        <h3 className='text-lg font-semibold mb-4'>Staff List</h3>
         {filteredStaff.length === 0 ? (
-          <div className="text-center py-8">
-            <User className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">
+          <div className='text-center py-8'>
+            <User className='h-12 w-12 text-gray-400 mx-auto mb-4' />
+            <h3 className='text-lg font-medium text-gray-900 mb-2'>
               No staff found
             </h3>
-            <p className="text-gray-600 mb-4">
+            <p className='text-gray-600 mb-4'>
               {Object.values(filters).some((f) => f)
-                ? "No staff match your current filters."
-                : "Create your first staff member to get started."}
+                ? 'No staff match your current filters.'
+                : 'Create your first staff member to get started.'}
             </p>
             <Button
               onClick={() => {
@@ -556,9 +556,9 @@ const CreateStaff = () => {
                 setEditStaff(null);
                 resetForm();
               }}
-              disabled={!hasPermission("create", "staff")}
+              disabled={!hasPermission('create', 'staff')}
             >
-              <Plus className="h-4 w-4 mr-2" />
+              <Plus className='h-4 w-4 mr-2' />
               Create First Staff
             </Button>
           </div>
