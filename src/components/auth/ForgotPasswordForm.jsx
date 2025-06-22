@@ -103,7 +103,7 @@ const ForgotPasswordForm = () => {
 
             <Button
               as={Link}
-              to="/auth/login"
+              to="/login"
               variant="outline"
               className="w-full"
             >
@@ -182,7 +182,7 @@ const ForgotPasswordForm = () => {
         {/* Back to Login */}
         <div className="mt-6">
           <Link
-            to="/auth/login"
+            to="/login"
             className="flex items-center justify-center text-sm text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300 font-medium"
           >
             <ArrowLeft className="mr-2 h-4 w-4" />

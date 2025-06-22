@@ -20,9 +20,13 @@ import {
   FileText,
   CheckCircle,
   AlertCircle,
+  Tangent,
+  BookOpenCheck,
+  ShieldOff,
+  Strikethrough,
 } from "lucide-react";
 
-const LeadDetailsView = ({ lead }) => {
+const LeadDetailsView = ({ lead, className="max-h-[96vh] overflow-y-auto", }) => {
   const InfoCard = ({ icon: Icon, title, children, className = "" }) => (
     <div
       className={`bg-white rounded-xl shadow-sm border border-gray-100 p-6 hover:shadow-md transition-shadow duration-200 ${className}`}
@@ -110,7 +114,7 @@ const LeadDetailsView = ({ lead }) => {
   );
 
   return (
-    <div className="max-h-[80vh] overflow-y-auto bg-gray-50 p-6">
+    <div className={`bg-gray-50 p-6 rounded-md ${className}`}>
       <div className="max-w-4xl mx-auto space-y-6">
         {/* Header */}
         <div className="bg-gradient-to-r from-blue-600 to-blue-700 rounded-xl p-6 text-white">
@@ -177,18 +181,22 @@ const LeadDetailsView = ({ lead }) => {
                 <InfoRow
                   label="Gender"
                   value={lead.student.profile.personalInfo?.gender}
+                  icon={Tangent}
                 />
                 <InfoRow
                   label="Religion"
                   value={lead.student.profile.personalInfo?.religion}
+                  icon={BookOpenCheck}
                 />
                 <InfoRow
                   label="Sect"
                   value={lead.student.profile.personalInfo?.sect}
+                  icon={ShieldOff}
                 />
                 <InfoRow
                   label="Ethnicity"
                   value={lead.student.profile.personalInfo?.ethnicity}
+                  icon={Strikethrough}
                 />
                 <InfoRow
                   label="CNIC Number"
@@ -718,116 +726,3 @@ const LeadDetailsView = ({ lead }) => {
 };
 
 export default LeadDetailsView;
-
-// // Sample data for preview
-// const sampleLead = {
-//   id: "LEAD-2024-001",
-//   status: "active",
-//   source: "Website Form",
-//   student: {
-//     name: "Ahmed Hassan",
-//     email: "ahmed.hassan@example.com",
-//     phone: "+92-300-1234567",
-//     id: "STU-2024-001",
-//     profile: {
-//       personalInfo: {
-//         fullName: {
-//           firstName: "Ahmed",
-//           lastName: "Hassan",
-//         },
-//         fatherName: "Muhammad Hassan",
-//         dateOfBirth: "1998-05-15",
-//         gender: "Male",
-//         religion: "Islam",
-//         sect: "Sunni",
-//         ethnicity: "Punjabi",
-//         cnicNumber: "12345-6789012-3",
-//         residenceCountry: "Pakistan",
-//         permanentAddress: {
-//           street: "123 Main Street",
-//           city: "Lahore",
-//           postalCode: "54000",
-//           provinceOfDomicile: "Punjab",
-//         },
-//         emergencyContact: {
-//           name: "Fatima Hassan",
-//           phone: "+92-300-9876543",
-//           relation: "Mother",
-//         },
-//       },
-//       educationalBackground: {
-//         studyLevel: "Undergraduate",
-//         admissionYear: "2024",
-//         educationalGap: "No gap",
-//         additionalCertification: true,
-//         matriculation: {
-//           year: "2016",
-//           board: "BISE Lahore",
-//           rollNumber: "123456",
-//           gradingSystem: "Percentage",
-//           scorePercentage: "85%",
-//           subjects: "Science",
-//           grades: [
-//             { subject: "Mathematics", grade: "A+" },
-//             { subject: "Physics", grade: "A" },
-//             { subject: "Chemistry", grade: "A" },
-//           ],
-//         },
-//         intermediate: {
-//           year: "2018",
-//           board: "BISE Lahore",
-//           rollNumber: "789012",
-//           gradingSystem: "Percentage",
-//           scorePercentage: "82%",
-//           preEngineeringOrPreMedical: "Pre-Engineering",
-//         },
-//       },
-//       testScores: {
-//         backlogs: "None",
-//         partTimeWork: true,
-//         workExperience: "2 years",
-//         duolingoScore: {
-//           total: "120",
-//           testDate: "2024-01-15",
-//         },
-//       },
-//       studyPreferences: {
-//         careerGoals: "Software Engineer",
-//         studyReason: "Career advancement",
-//         coOpInterest: true,
-//         familyAbroad: false,
-//         scholarshipInterest: true,
-//         accommodationSupport: true,
-//         preferredCourse: "Computer Science",
-//         specialization: "Artificial Intelligence",
-//         preferredCountry: "Canada",
-//         intendedIntake: {
-//           season: "Fall",
-//           year: "2024",
-//         },
-//         preferredUniversities: [
-//           "University of Toronto",
-//           "University of British Columbia",
-//           "McGill University",
-//         ],
-//       },
-//       workExperience: {
-//         company: "Tech Solutions Ltd",
-//         position: "Junior Developer",
-//         duration: "2 years",
-//       },
-//       financialInfo: {
-//         sponsor: "Self-sponsored",
-//         budget: "$50,000 CAD",
-//       },
-//       additionalInfo: {
-//         hobbies: "Reading, Coding",
-//         languages: "English, Urdu, Punjabi",
-//       },
-//     },
-//   },
-// };
-
-// export default function App() {
-//   return <LeadDetailsView lead={sampleLead} />;
-// }

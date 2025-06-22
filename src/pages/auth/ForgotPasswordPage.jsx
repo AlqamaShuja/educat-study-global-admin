@@ -8,8 +8,8 @@ const ForgotPasswordPage = () => {
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <div className="flex justify-center">
           <div className="flex items-center space-x-2">
-            <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-lg">A</span>
+            <div className="bg-blue-600 rounded-lg flex items-center justify-center">
+              <span className="text-white font-bold text-lg" title="Study Global">SG</span>
             </div>
             <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
               Admin Panel
@@ -24,7 +24,7 @@ const ForgotPasswordPage = () => {
         <p className="mt-2 text-center text-sm text-gray-600 dark:text-gray-400">
           Remember your password?{" "}
           <Link
-            to="/auth/login"
+            to="/login"
             className="font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400"
           >
             Sign in here

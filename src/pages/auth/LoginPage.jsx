@@ -24,8 +24,8 @@ const LoginPage = () => {
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <div className="flex justify-center">
           <div className="flex items-center space-x-2">
-            <div className="h-8 px-3 bg-blue-600 rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-lg">EduCRM</span>
+            <div className="h-8 px-4 py-1 bg-blue-600 rounded-lg flex items-center justify-center">
+              <span className="text-white font-bold text-lg" title="Study Global">SG</span>
             </div>
             <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
               Admin Panel

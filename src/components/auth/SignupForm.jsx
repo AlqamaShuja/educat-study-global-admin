@@ -341,7 +341,7 @@ const SignupForm = ({ onSuccess, redirectTo = "/dashboard" }) => {
         </form>
 
         {/* Divider */}
-        <div className="mt-6">
+        {/* <div className="mt-6">
           <div className="relative">
             <div className="absolute inset-0 flex items-center">
               <div className="w-full border-t border-gray-300 dark:border-gray-600" />
@@ -354,21 +354,20 @@ const SignupForm = ({ onSuccess, redirectTo = "/dashboard" }) => {
           </div>
         </div>
 
-        {/* OAuth Buttons */}
         <div className="mt-6">
           <OAuthButtons
             onSuccess={onSuccess}
             redirectTo={redirectTo}
             disabled={isSubmitting || isLoading}
           />
-        </div>
+        </div> */}
 
         {/* Sign In Link */}
         <div className="mt-6 text-center">
           <p className="text-sm text-gray-600 dark:text-gray-400">
             Already have an account?{" "}
             <Link
-              to="/auth/login"
+              to="/login"
               className="text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300 font-medium"
             >
               Sign in

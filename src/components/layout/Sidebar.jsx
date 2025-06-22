@@ -218,8 +218,8 @@ const Sidebar = ({ onClose, user }) => {
           ),
         },
         {
-          name: "Team Management",
-          href: "/manager/team",
+          name: "Receptionist Management",
+          href: "/manager/receptionist",
           icon: (
             <svg
               className="w-5 h-5"
@@ -573,6 +573,12 @@ const Sidebar = ({ onClose, user }) => {
 
   const navigationItems = getNavigationItems();
 
+  const getRoleCapitalize = (role) => {
+    if(!role || role == '') return 'Admin';
+    const splitted = role.split("");
+    return splitted[0].toUpperCase() + splitted.slice(1).join("");
+  }
+
   return (
     <div className="flex flex-col h-full bg-card text-foreground border-r border-white">
       {/* Logo */}
@@ -581,7 +587,7 @@ const Sidebar = ({ onClose, user }) => {
           <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
             <span className="text-white font-bold text-sm">A</span>
           </div>
-          <span className="text-xl font-semibold">Admin Panel</span>
+          <span className="text-xl font-semibold">{getRoleCapitalize(user.role)} Panel</span>
         </div>
         {onClose && (
           <button

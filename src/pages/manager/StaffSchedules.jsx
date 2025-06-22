@@ -280,7 +280,7 @@ const StaffSchedules = () => {
           variant="primary"
           onClick={() => setShowAddModal(true)}
           //   disabled={!hasPermission("create", "schedules")}
-          className="bg-indigo-600 hover:bg-indigo-700 text-white"
+          className="bg-blue-600 hover:bg-blue-700 text-white"
         >
           <Plus className="h-4 w-4 mr-2" />
           Add Schedule
@@ -298,11 +298,11 @@ const StaffSchedules = () => {
               onChange={(e) =>
                 setFilters({ ...filters, search: e.target.value })
               }
-              className="pl-10 border-gray-300 focus:ring-indigo-500 focus:border-indigo-500"
+              className="pl-10 border-gray-300 focus:ring-blue-500 focus:border-blue-500"
             />
           </div>
           <select
-            className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+            className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
             value={filters.staffId}
             onChange={(e) =>
               setFilters({ ...filters, staffId: e.target.value })
@@ -319,7 +319,7 @@ const StaffSchedules = () => {
             type="date"
             value={filters.date}
             onChange={(e) => setFilters({ ...filters, date: e.target.value })}
-            className="border-gray-300 focus:ring-indigo-500 focus:border-indigo-500"
+            className="border-gray-300 focus:ring-blue-500 focus:border-blue-500"
           />
           <div className="text-sm text-gray-600 flex items-center">
             {filteredSchedules?.length} of {schedules?.length} schedules
@@ -347,7 +347,7 @@ const StaffSchedules = () => {
               variant="primary"
               onClick={() => setShowAddModal(true)}
               //   disabled={!hasPermission("create", "schedules")}
-              className="bg-indigo-600 hover:bg-indigo-700 text-white"
+              className="bg-blue-600 hover:bg-blue-700 text-white"
             >
               <Plus className="h-4 w-4 mr-2" />
               Add First Schedule
@@ -464,7 +464,7 @@ const StaffSchedules = () => {
                             setShowEditModal(true);
                           }}
                           //   disabled={!hasPermission("edit", "schedules")}
-                          className="border-indigo-300 text-indigo-600 hover:bg-indigo-50"
+                          className="border-blue-300 text-blue-600 hover:bg-blue-50"
                         >
                           <Edit className="h-4 w-4" />
                         </Button>
@@ -531,7 +531,7 @@ const StaffSchedules = () => {
               Student *
             </label>
             <select
-              className={`block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 ${
+              className={`block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 ${
                 formErrors.studentId ? "border-red-500" : ""
               }`}
               value={scheduleForm.studentId}
@@ -585,7 +585,7 @@ const StaffSchedules = () => {
               Staff Member *
             </label>
             <select
-              className={`block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 ${
+              className={`block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 ${
                 formErrors.staffId ? "border-red-500" : ""
               }`}
               value={scheduleForm.staffId}
@@ -652,7 +652,7 @@ const StaffSchedules = () => {
                 Type *
               </label>
               <select
-                className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                 value={scheduleForm.type}
                 onChange={(e) =>
                   setScheduleForm({ ...scheduleForm, type: e.target.value })
@@ -670,7 +670,7 @@ const StaffSchedules = () => {
                 Status *
               </label>
               <select
-                className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                 value={scheduleForm.status}
                 onChange={(e) =>
                   setScheduleForm({ ...scheduleForm, status: e.target.value })
@@ -689,7 +689,7 @@ const StaffSchedules = () => {
               Notes
             </label>
             <textarea
-              className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+              className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
               rows={3}
               value={scheduleForm.notes}
               onChange={(e) =>
@@ -712,7 +712,7 @@ const StaffSchedules = () => {
             <Button
               variant="primary"
               onClick={handleAddSchedule}
-              className="bg-indigo-600 hover:bg-indigo-700 text-white"
+              className="bg-blue-600 hover:bg-blue-700 text-white"
             >
               Add Schedule
             </Button>
@@ -737,7 +737,7 @@ const StaffSchedules = () => {
               Student *
             </label>
             <select
-              className={`block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 ${
+              className={`block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 ${
                 formErrors.studentId ? "border-red-500" : ""
               }`}
               value={scheduleForm.studentId}
@@ -763,7 +763,7 @@ const StaffSchedules = () => {
               Staff Member *
             </label>
             <select
-              className={`block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 ${
+              className={`block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 ${
                 formErrors.staffId ? "border-red-500" : ""
               }`}
               value={scheduleForm.staffId}
@@ -830,7 +830,7 @@ const StaffSchedules = () => {
                 Type *
               </label>
               <select
-                className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                 value={scheduleForm.type}
                 onChange={(e) =>
                   setScheduleForm({ ...scheduleForm, type: e.target.value })
@@ -848,7 +848,7 @@ const StaffSchedules = () => {
                 Status *
               </label>
               <select
-                className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                 value={scheduleForm.status}
                 onChange={(e) =>
                   setScheduleForm({ ...scheduleForm, status: e.target.value })
@@ -867,7 +867,7 @@ const StaffSchedules = () => {
               Notes
             </label>
             <textarea
-              className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+              className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
               rows={3}
               value={scheduleForm.notes}
               onChange={(e) =>
@@ -891,7 +891,7 @@ const StaffSchedules = () => {
             <Button
               variant="primary"
               onClick={handleEditSchedule}
-              className="bg-indigo-600 hover:bg-indigo-700 text-white"
+              className="bg-blue-600 hover:bg-blue-700 text-white"
             >
               Update Schedule
             </Button>
@@ -1295,7 +1295,7 @@ export default StaffSchedules;
 //             />
 //           </div>
 //           <select
-//             className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+//             className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
 //             value={filters.staffId}
 //             onChange={(e) =>
 //               setFilters({ ...filters, staffId: e.target.value })
@@ -1369,7 +1369,7 @@ export default StaffSchedules;
 //               Staff Member *
 //             </label>
 //             <select
-//               className={`block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 ${
+//               className={`block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 ${
 //                 formErrors.staffId ? "border-red-500" : ""
 //               }`}
 //               value={scheduleForm.staffId}
@@ -1435,7 +1435,7 @@ export default StaffSchedules;
 //                 Type *
 //               </label>
 //               <select
-//                 className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+//                 className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
 //                 value={scheduleForm.type}
 //                 onChange={(e) =>
 //                   setScheduleForm({ ...scheduleForm, type: e.target.value })
@@ -1453,7 +1453,7 @@ export default StaffSchedules;
 //                 Status *
 //               </label>
 //               <select
-//                 className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+//                 className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
 //                 value={scheduleForm.status}
 //                 onChange={(e) =>
 //                   setScheduleForm({ ...scheduleForm, status: e.target.value })
@@ -1472,7 +1472,7 @@ export default StaffSchedules;
 //               Notes
 //             </label>
 //             <textarea
-//               className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+//               className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
 //               rows={3}
 //               value={scheduleForm.notes}
 //               onChange={(e) =>
@@ -1515,7 +1515,7 @@ export default StaffSchedules;
 //               Staff Member *
 //             </label>
 //             <select
-//               className={`block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 ${
+//               className={`block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 ${
 //                 formErrors.staffId ? "border-red-500" : ""
 //               }`}
 //               value={scheduleForm.staffId}
@@ -1581,7 +1581,7 @@ export default StaffSchedules;
 //                 Type *
 //               </label>
 //               <select
-//                 className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+//                 className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
 //                 value={scheduleForm.type}
 //                 onChange={(e) =>
 //                   setScheduleForm({ ...scheduleForm, type: e.target.value })
@@ -1599,7 +1599,7 @@ export default StaffSchedules;
 //                 Status *
 //               </label>
 //               <select
-//                 className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+//                 className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
 //                 value={scheduleForm.status}
 //                 onChange={(e) =>
 //                   setScheduleForm({ ...scheduleForm, status: e.target.value })
@@ -1618,7 +1618,7 @@ export default StaffSchedules;
 //               Notes
 //             </label>
 //             <textarea
-//               className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+//               className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
 //               rows={3}
 //               value={scheduleForm.notes}
 //               onChange={(e) =>

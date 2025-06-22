@@ -1,631 +1,357 @@
 import React, { useState, useEffect } from "react";
-import useApi from "../../hooks/useApi";
-import useAuthStore from "../../stores/authStore";
+import useManagerStore from "../../stores/useManagerStore";
 import usePermissions from "../../hooks/usePermissions";
-import { validateTeamMemberForm, validateInput } from "../../utils/validators";
+import managerService from "../../services/managerService";
 import Card from "../../components/ui/Card";
 import Button from "../../components/ui/Button";
-import Badge from "../../components/ui/Badge";
-import Modal from "../../components/ui/Modal";
-import Input from "../../components/ui/Input";
 import LoadingSpinner from "../../components/ui/LoadingSpinner";
-import Toast from "../../components/ui/Toast";
-import DataTable from "../../components/tables/DataTable";
-import {
-  Users,
-  Plus,
-  Edit,
-  Trash2,
-  Search,
-  UserCheck,
-  Shield,
-  Mail,
-} from "lucide-react";
+import AddOrEditConsultantModal from "../../components/manager/AddOrEditConsultantModal";
+import { UserPlus, Edit, Trash2, Users, Shield, X } from "lucide-react";
+import { toast } from "react-toastify";
 
 const TeamManagement = () => {
-  const { user } = useAuthStore();
-  const { callApi, services, loading: apiLoading, error: apiError } = useApi();
-  const { hasPermission } = usePermissions();
-  const [teamMembers, setTeamMembers] = useState([]);
-  const [filters, setFilters] = useState({ search: "", role: "", status: "" });
+  const {
+    fetchOfficeReceptionist,
+    receptionists,
+    setReceptionists,
+    consultants,
+    loading,
+    error,
+  } = useManagerStore();
+  //   const { hasPermission } = usePermissions();
+  //   const [receptionists, setReceptionists] = useState([]);
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
-  const [selectedMember, setSelectedMember] = useState(null);
-  const [formErrors, setFormErrors] = useState({});
-  const [toast, setToast] = useState({
-    show: false,
-    message: "",
-    type: "success",
-  });
-
-  const [memberForm, setMemberForm] = useState({
-    name: "",
-    email: "",
-    role: "consultant",
-    status: "active",
-  });
-
-  const roles = [
-    {
-      value: "consultant",
-      label: "Consultant",
-      color: "bg-blue-100 text-blue-800",
-    },
-    {
-      value: "receptionist",
-      label: "Receptionist",
-      color: "bg-green-100 text-green-800",
-    },
-    {
-      value: "manager",
-      label: "Manager",
-      color: "bg-purple-100 text-purple-800",
-    },
-  ];
-
-  const statuses = [
-    { value: "active", label: "Active", color: "bg-green-100 text-green-800" },
-    {
-      value: "inactive",
-      label: "Inactive",
-      color: "bg-gray-100 text-gray-800",
-    },
-  ];
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [selectedReceptionist, setSelectedReceptionist] = useState(null);
+  const [receptionistToDelete, setReceptionistToDelete] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 10;
 
   useEffect(() => {
-    if (user && hasPermission("manage", "team")) {
-      fetchTeamMembers();
-    }
-  }, [user]);
+    // Fetch staff members and filter for receptionists
+    fetchOfficeReceptionist();
+  }, []);
 
-  const fetchTeamMembers = async () => {
+  useEffect(() => {
+    if (error) {
+      toast.error(error, {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        theme: "colored",
+      });
+    }
+  }, [error]);
+
+  const handleAddOrEditReceptionist = async (formData) => {
+    console.log(formData, "acakscnasncasjncs:1");
+
     try {
-      const response = await callApi(services.user.getTeamMembers);
-      setTeamMembers(
-        response?.map((member) => ({
-          id: member.id,
-          name: validateInput(member.name),
-          email: validateInput(member.email),
-          role: member.role,
-          status: member.status,
-          leadsAssigned: member.leadsAssigned || 0,
-          leadsConverted: member.leadsConverted || 0,
-        })) || []
+      // Create new receptionist
+      const newReceptionist = await managerService.createStaffMember({
+        ...formData,
+        role: "receptionist",
+      });
+      console.log(newReceptionist, "acakscnasncasjncs:2");
+      await fetchOfficeReceptionist();
+    } catch {
+      toast.error("Failed to add or update Receptionist");
+    }
+  };
+
+  const handleDeleteReceptionist = async () => {
+    try {
+      await managerService.disconnectStaffMember(receptionistToDelete.id);
+      const updatedReceptionist = receptionists.filter(
+        (rec) => rec.id !== receptionistToDelete.id
       );
-    } catch (error) {
-      setToast({
-        show: true,
-        message: apiError || "Failed to fetch team members",
-        type: "error",
+      setReceptionists(updatedReceptionist);
+      setShowDeleteModal(false);
+      setReceptionistToDelete(null);
+      toast.success("Receptionist deleted successfully", {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        theme: "colored",
       });
-    }
-  };
-
-  const handleAddMember = async () => {
-    const validationErrors = validateTeamMemberForm(memberForm);
-    if (Object.keys(validationErrors).length) {
-      setFormErrors(validationErrors);
-      return;
-    }
-
-    try {
-      const newMember = await callApi(services.user.createTeamMember, {
-        ...memberForm,
-        name: validateInput(memberForm.name),
-        email: validateInput(memberForm.email),
-      });
-      setTeamMembers((prev) => [...prev, newMember]);
-      setShowAddModal(false);
-      resetForm();
-      setToast({
-        show: true,
-        message: "Team member added successfully!",
-        type: "success",
-      });
-    } catch (error) {
-      setToast({
-        show: true,
-        message: apiError || "Failed to add team member",
-        type: "error",
-      });
-    }
-  };
-
-  const handleEditMember = async () => {
-    const validationErrors = validateTeamMemberForm(memberForm);
-    if (Object.keys(validationErrors).length) {
-      setFormErrors(validationErrors);
-      return;
-    }
-
-    try {
-      const updatedMember = await callApi(
-        services.user.updateTeamMember,
-        selectedMember.id,
+    } catch (err) {
+      toast.error(
+        err.response?.data?.message || "Failed to delete receptionist",
         {
-          ...memberForm,
-          name: validateInput(memberForm.name),
-          email: validateInput(memberForm.email),
+          position: "top-right",
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          theme: "colored",
         }
       );
-      setTeamMembers((prev) =>
-        prev.map((member) =>
-          member.id === selectedMember.id ? updatedMember : member
-        )
-      );
-      setShowEditModal(false);
-      setSelectedMember(null);
-      resetForm();
-      setToast({
-        show: true,
-        message: "Team member updated successfully!",
-        type: "success",
-      });
-    } catch (error) {
-      setToast({
-        show: true,
-        message: apiError || "Failed to update team member",
-        type: "error",
-      });
     }
   };
 
-  const handleDeleteMember = async (memberId) => {
-    if (!window.confirm("Are you sure you want to delete this team member?"))
-      return;
-
-    try {
-      await callApi(services.user.deleteTeamMember, memberId);
-      setTeamMembers((prev) => prev.filter((member) => member.id !== memberId));
-      setToast({
-        show: true,
-        message: "Team member deleted successfully!",
-        type: "success",
-      });
-    } catch (error) {
-      setToast({
-        show: true,
-        message: apiError || "Failed to delete team member",
-        type: "error",
-      });
-    }
+  const openDeleteModal = (receptionist) => {
+    setReceptionistToDelete(receptionist);
+    setShowDeleteModal(true);
   };
 
-  const resetForm = () => {
-    setMemberForm({
-      name: "",
-      email: "",
-      role: "consultant",
-      status: "active",
-    });
-    setFormErrors({});
-  };
+  // Pagination
+  const totalPages = Math.ceil(receptionists.length / pageSize);
+  const paginatedReceptionists = receptionists.slice(
+    (currentPage - 1) * pageSize,
+    currentPage * pageSize
+  );
 
-  const filteredTeamMembers = teamMembers.filter((member) => {
-    const matchesSearch =
-      !filters.search ||
-      member.name.toLowerCase().includes(filters.search.toLowerCase()) ||
-      member.email.toLowerCase().includes(filters.search.toLowerCase());
-    const matchesRole = !filters.role || member.role === filters.role;
-    const matchesStatus = !filters.status || member.status === filters.status;
-    return matchesSearch && matchesRole && matchesStatus;
-  });
-
-  const getRoleColor = (role) =>
-    roles.find((r) => r.value === role)?.color || "bg-gray-100 text-gray-800";
-
-  const getStatusColor = (status) =>
-    statuses.find((s) => s.value === status)?.color ||
-    "bg-gray-100 text-gray-800";
-
-  const columns = [
-    {
-      key: "name",
-      label: "Name",
-      render: (member) => (
-        <div className="flex items-center">
-          <UserCheck className="h-4 w-4 text-gray-400 mr-2" />
-          <span className="text-sm">{member.name}</span>
-        </div>
-      ),
-    },
-    {
-      key: "email",
-      label: "Email",
-      render: (member) => (
-        <div className="flex items-center">
-          <Mail className="h-4 w-4 text-gray-400 mr-2" />
-          <span className="text-sm">{member.email}</span>
-        </div>
-      ),
-    },
-    {
-      key: "role",
-      label: "Role",
-      render: (member) => (
-        <Badge className={getRoleColor(member.role)}>
-          {roles.find((r) => r.value === member.role)?.label}
-        </Badge>
-      ),
-    },
-    {
-      key: "status",
-      label: "Status",
-      render: (member) => (
-        <Badge className={getStatusColor(member.status)}>
-          {statuses.find((s) => s.value === member.status)?.label}
-        </Badge>
-      ),
-    },
-    {
-      key: "leadsAssigned",
-      label: "Leads Assigned",
-      render: (member) => (
-        <span className="text-sm">{member.leadsAssigned}</span>
-      ),
-    },
-    {
-      key: "leadsConverted",
-      label: "Leads Converted",
-      render: (member) => (
-        <span className="text-sm">{member.leadsConverted}</span>
-      ),
-    },
-    {
-      key: "actions",
-      label: "Actions",
-      render: (member) => (
-        <div className="flex space-x-2">
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={() => {
-              setSelectedMember(member);
-              setMemberForm({
-                name: member.name,
-                email: member.email,
-                role: member.role,
-                status: member.status,
-              });
-              setShowEditModal(true);
-            }}
-            disabled={!hasPermission("edit", "team")}
-          >
-            <Edit className="h-4 w-4" />
-          </Button>
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={() => handleDeleteMember(member.id)}
-            className="border-red-300 text-red-600 hover:bg-red-50"
-            disabled={!hasPermission("delete", "team")}
-          >
-            <Trash2 className="h-4 w-4" />
-          </Button>
-        </div>
-      ),
-    },
-  ];
-
-  if (apiLoading) {
+  if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <LoadingSpinner size="lg" />
+        <LoadingSpinner size="lg" className="text-blue-600" />
       </div>
     );
   }
 
-  if (!hasPermission("manage", "team")) {
-    return (
-      <div className="text-center py-8">
-        <Shield className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-        <h3 className="text-lg font-medium text-gray-900 mb-2">
-          Access Denied
-        </h3>
-        <p className="text-gray-600">
-          You do not have permission to manage team members.
-        </p>
-      </div>
-    );
-  }
+  //   if (!hasPermission("manage", "receptionists")) {
+  //     return (
+  //       <div className="text-center py-8">
+  //         <Shield className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+  //         <h3 className="text-lg font-medium text-gray-900 mb-2">
+  //           Access Denied
+  //         </h3>
+  //         <p className="text-gray-600">
+  //           You do not have permission to manage receptionists.
+  //         </p>
+  //       </div>
+  //     );
+  //   }
 
   return (
-    <div className="space-y-6">
-      <Toast
-        isOpen={toast.show}
-        message={toast.message}
-        type={toast.type}
-        onClose={() => setToast({ ...toast, show: false })}
-      />
-
+    <div className="p-6 space-y-8 bg-gradient-to-br from-gray-50 to-indigo-50 min-h-screen">
       {/* Header */}
-      <div className="flex justify-between items-center">
+      <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Team Management</h1>
-          <p className="text-gray-600">
-            Manage your team members and their roles.
+          <h1 className="text-3xl font-extrabold text-gray-900 tracking-tight">
+            Receptionist Management
+          </h1>
+          <p className="mt-1 text-sm text-gray-600">
+            Manage your office receptionists
           </p>
         </div>
         <Button
+          variant="primary"
           onClick={() => setShowAddModal(true)}
-          disabled={!hasPermission("create", "team")}
+          //   disabled={!hasPermission("create", "receptionists")}
+          className="bg-blue-600 hover:bg-blue-700 text-white transition-colors duration-200"
         >
-          <Plus className="h-4 w-4 mr-2" />
-          Add Team Member
+          <UserPlus className="h-4 w-4 mr-2" />
+          Add Receptionist
         </Button>
-      </div>
+      </header>
 
-      {/* Filters */}
-      <Card className="p-4">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-            <Input
-              placeholder="Search by name or email..."
-              value={filters.search}
-              onChange={(e) =>
-                setFilters({ ...filters, search: e.target.value })
-              }
-              className="pl-10"
-            />
-          </div>
-          <select
-            className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-            value={filters.role}
-            onChange={(e) => setFilters({ ...filters, role: e.target.value })}
-          >
-            <option value="">All Roles</option>
-            {roles.map((role) => (
-              <option key={role.value} value={role.value}>
-                {role.label}
-              </option>
-            ))}
-          </select>
-          <select
-            className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-            value={filters.status}
-            onChange={(e) => setFilters({ ...filters, status: e.target.value })}
-          >
-            <option value="">All Statuses</option>
-            {statuses.map((status) => (
-              <option key={status.value} value={status.value}>
-                {status.label}
-              </option>
-            ))}
-          </select>
-          <div className="text-sm text-gray-600 flex items-center">
-            {filteredTeamMembers.length} of {teamMembers.length} members
-          </div>
-        </div>
-      </Card>
-
-      {/* Team Members Table */}
-      <Card className="p-4">
-        <h3 className="text-lg font-semibold mb-4">Team Members</h3>
-        {filteredTeamMembers.length === 0 ? (
+      {/* Receptionists Table */}
+      <Card className="shadow-md hover:shadow-lg transition-shadow duration-300 animate-fade-in bg-white">
+        <h3 className="text-lg font-semibold mb-4 text-gray-900 px-6 pt-4">
+          Receptionists
+        </h3>
+        {receptionists.length === 0 ? (
           <div className="text-center py-8">
             <Users className="h-12 w-12 text-gray-400 mx-auto mb-4" />
             <h3 className="text-lg font-medium text-gray-900 mb-2">
-              No team members found
+              No receptionists found
             </h3>
             <p className="text-gray-600 mb-4">
-              {Object.values(filters).some((f) => f)
-                ? "No members match your current filters."
-                : "Add your first team member to get started."}
+              Add your first receptionist to get started.
             </p>
             <Button
+              variant="primary"
               onClick={() => setShowAddModal(true)}
-              disabled={!hasPermission("create", "team")}
+              //   disabled={!hasPermission("create", "receptionists")}
+              className="bg-blue-600 hover:bg-blue-700 text-white transition-colors duration-200"
             >
-              <Plus className="h-4 w-4 mr-2" />
-              Add First Member
+              <UserPlus className="h-4 w-4 mr-2" />
+              Add First Receptionist
             </Button>
           </div>
         ) : (
-          <DataTable
-            data={filteredTeamMembers}
-            columns={columns}
-            pagination={true}
-            pageSize={10}
-          />
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Name
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Email
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Phone
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Actions
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {paginatedReceptionists.map((receptionist, index) => (
+                  <tr
+                    key={receptionist.id}
+                    className={`hover:bg-indigo-50 transition-colors duration-200 ${
+                      index % 2 === 0 ? "bg-white" : "bg-gray-50"
+                    }`}
+                  >
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                      {receptionist.name || "N/A"}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {receptionist.email || "N/A"}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {receptionist.phone || "N/A"}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm">
+                      <div className="flex space-x-2">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => {
+                            setSelectedReceptionist(receptionist);
+                            setShowEditModal(true);
+                          }}
+                          //   disabled={!hasPermission("edit", "receptionists")}
+                          className="border-blue-300 text-blue-600 hover:bg-blue-50 transition-colors duration-200"
+                        >
+                          <Edit className="h-4 w-4 mr-1" />
+                          Edit
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => openDeleteModal(receptionist)}
+                          //   disabled={!hasPermission("delete", "receptionists")}
+                          className="border-red-300 text-red-600 hover:bg-red-50 transition-colors duration-200"
+                        >
+                          <Trash2 className="h-4 w-4 mr-1" />
+                          Delete
+                        </Button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            {/* Pagination */}
+            {totalPages > 1 && (
+              <div className="mt-4 flex justify-between items-center px-6 pb-4">
+                <Button
+                  variant="outline"
+                  onClick={() =>
+                    setCurrentPage((prev) => Math.max(prev - 1, 1))
+                  }
+                  disabled={currentPage === 1}
+                  className="border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors duration-200"
+                >
+                  Previous
+                </Button>
+                <span className="text-sm text-gray-600">
+                  Page {currentPage} of {totalPages}
+                </span>
+                <Button
+                  variant="outline"
+                  onClick={() =>
+                    setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+                  }
+                  disabled={currentPage === totalPages}
+                  className="border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors duration-200"
+                >
+                  Next
+                </Button>
+              </div>
+            )}
+          </div>
         )}
       </Card>
 
-      {/* Add Team Member Modal */}
-      <Modal
+      {/* Add Receptionist Modal */}
+      <AddOrEditConsultantModal
         isOpen={showAddModal}
-        onClose={() => {
-          setShowAddModal(false);
-          resetForm();
-        }}
-        title="Add Team Member"
-        size="lg"
-      >
-        <div className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Name *
-            </label>
-            <Input
-              value={memberForm.name}
-              onChange={(e) =>
-                setMemberForm({ ...memberForm, name: e.target.value })
-              }
-              placeholder="Enter full name"
-              className={formErrors.name ? "border-red-500" : ""}
-            />
-            {formErrors.name && (
-              <p className="text-red-500 text-xs mt-1">{formErrors.name}</p>
-            )}
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Email *
-            </label>
-            <Input
-              type="email"
-              value={memberForm.email}
-              onChange={(e) =>
-                setMemberForm({ ...memberForm, email: e.target.value })
-              }
-              placeholder="Enter email address"
-              className={formErrors.email ? "border-red-500" : ""}
-            />
-            {formErrors.email && (
-              <p className="text-red-500 text-xs mt-1">{formErrors.email}</p>
-            )}
-          </div>
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Role *
-              </label>
-              <select
-                className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                value={memberForm.role}
-                onChange={(e) =>
-                  setMemberForm({ ...memberForm, role: e.target.value })
-                }
-              >
-                {roles.map((role) => (
-                  <option key={role.value} value={role.value}>
-                    {role.label}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Status *
-              </label>
-              <select
-                className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                value={memberForm.status}
-                onChange={(e) =>
-                  setMemberForm({ ...memberForm, status: e.target.value })
-                }
-              >
-                {statuses.map((status) => (
-                  <option key={status.value} value={status.value}>
-                    {status.label}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
-          <div className="flex justify-end space-x-3">
-            <Button
-              variant="outline"
-              onClick={() => {
-                setShowAddModal(false);
-                resetForm();
-              }}
-            >
-              Cancel
-            </Button>
-            <Button onClick={handleAddMember}>Add Member</Button>
-          </div>
-        </div>
-      </Modal>
+        onClose={() => setShowAddModal(false)}
+        onSubmit={handleAddOrEditReceptionist}
+        role="receptionist"
+      />
 
-      {/* Edit Team Member Modal */}
-      <Modal
+      {/* Edit Receptionist Modal */}
+      <AddOrEditConsultantModal
         isOpen={showEditModal}
         onClose={() => {
           setShowEditModal(false);
-          setSelectedMember(null);
-          resetForm();
+          setSelectedReceptionist(null);
         }}
-        title="Edit Team Member"
-        size="lg"
-      >
-        <div className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Name *
-            </label>
-            <Input
-              value={memberForm.name}
-              onChange={(e) =>
-                setMemberForm({ ...memberForm, name: e.target.value })
-              }
-              placeholder="Enter full name"
-              className={formErrors.name ? "border-red-500" : ""}
-            />
-            {formErrors.name && (
-              <p className="text-red-500 text-xs mt-1">{formErrors.name}</p>
-            )}
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Email *
-            </label>
-            <Input
-              type="email"
-              value={memberForm.email}
-              onChange={(e) =>
-                setMemberForm({ ...memberForm, email: e.target.value })
-              }
-              placeholder="Enter email address"
-              className={formErrors.email ? "border-red-500" : ""}
-            />
-            {formErrors.email && (
-              <p className="text-red-500 text-xs mt-1">{formErrors.email}</p>
-            )}
-          </div>
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Role *
-              </label>
-              <select
-                className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                value={memberForm.role}
-                onChange={(e) =>
-                  setMemberForm({ ...memberForm, role: e.target.value })
-                }
-              >
-                {roles.map((role) => (
-                  <option key={role.value} value={role.value}>
-                    {role.label}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Status *
-              </label>
-              <select
-                className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                value={memberForm.status}
-                onChange={(e) =>
-                  setMemberForm({ ...memberForm, status: e.target.value })
-                }
-              >
-                {statuses.map((status) => (
-                  <option key={status.value} value={status.value}>
-                    {status.label}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
-          <div className="flex justify-end space-x-3">
-            <Button
-              variant="outline"
-              onClick={() => {
-                setShowEditModal(false);
-                setSelectedMember(null);
-                resetForm();
-              }}
-            >
-              Cancel
-            </Button>
-            <Button onClick={handleEditMember}>Update Member</Button>
-          </div>
+        consultant={selectedReceptionist}
+        onSubmit={handleAddOrEditReceptionist}
+        role="receptionist"
+      />
+
+      {/* Delete Confirmation Modal */}
+      <DeleteConfirmationModal
+        isOpen={showDeleteModal}
+        onClose={() => setShowDeleteModal(false)}
+        onConfirm={handleDeleteReceptionist}
+        receptionistName={receptionistToDelete?.name}
+      />
+    </div>
+  );
+};
+
+const DeleteConfirmationModal = ({
+  isOpen,
+  onClose,
+  onConfirm,
+  receptionistName,
+}) => {
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div className="bg-white rounded-lg p-6 w-full max-w-md shadow-lg">
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-xl font-bold text-gray-900">Confirm Deletion</h2>
+          <button
+            onClick={onClose}
+            className="text-gray-500 hover:text-gray-700 transition-colors duration-200"
+          >
+            <X className="h-5 w-5" />
+          </button>
         </div>
-      </Modal>
+        <p className="text-sm text-gray-600 mb-4">
+          Are you sure you want to delete the receptionist{" "}
+          <span className="font-medium text-gray-900">
+            {receptionistName || "this user"}
+          </span>
+          ? This action cannot be undone.
+        </p>
+        <div className="flex justify-end space-x-2">
+          <Button
+            variant="outline"
+            onClick={onClose}
+            className="border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors duration-200"
+          >
+            Cancel
+          </Button>
+          <Button
+            variant="primary"
+            onClick={onConfirm}
+            className="bg-red-600 hover:bg-red-700 text-white transition-colors duration-200"
+          >
+            Delete
+          </Button>
+        </div>
+      </div>
     </div>
   );
 };

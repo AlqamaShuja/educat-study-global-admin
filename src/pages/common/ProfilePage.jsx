@@ -7,7 +7,6 @@ import {
   Mail,
   Phone,
   MapPin,
-  Calendar,
   Camera,
   Save,
   Lock,
@@ -18,11 +17,13 @@ import {
   Eye,
   EyeOff,
 } from "lucide-react";
+import { toast } from "react-toastify";
 import useAuthStore from "../../stores/authStore";
 import Button from "../../components/ui/Button";
 import Input from "../../components/ui/Input";
 import Card from "../../components/ui/Card";
 import Badge from "../../components/ui/Badge";
+import LoadingSpinner from "../../components/ui/LoadingSpinner";
 
 const profileSchema = z.object({
   firstName: z.string().min(2, "First name must be at least 2 characters"),
@@ -61,8 +62,7 @@ const ProfilePage = () => {
   } = useForm({
     resolver: zodResolver(profileSchema),
     defaultValues: {
-      firstName: user?.firstName || "",
-      lastName: user?.lastName || "",
+      name: user?.name || "",
       email: user?.email || "",
       phone: user?.phone || "",
       address: user?.address || "",
@@ -91,10 +91,19 @@ const ProfilePage = () => {
   const handleAvatarChange = (e) => {
     const file = e.target.files[0];
     if (file) {
+      if (file.size > 5 * 1024 * 1024) {
+        toast.error("File size must be less than 5MB");
+        return;
+      }
       setAvatarFile(file);
       const url = URL.createObjectURL(file);
       setPreviewUrl(url);
     }
+  };
+
+  const handleRemoveAvatar = () => {
+    setAvatarFile(null);
+    setPreviewUrl(null);
   };
 
   const handleProfileUpdate = async (data) => {
@@ -109,8 +118,17 @@ const ProfilePage = () => {
       }
 
       await updateProfile(formData);
+      toast.success("Profile updated successfully", {
+        position: "top-right",
+        autoClose: 3000,
+        theme: "colored",
+      });
     } catch (error) {
-      console.error("Profile update failed:", error);
+      toast.error(error.message || "Failed to update profile", {
+        position: "top-right",
+        autoClose: 3000,
+        theme: "colored",
+      });
     }
   };
 
@@ -118,16 +136,26 @@ const ProfilePage = () => {
     try {
       await changePassword(data.currentPassword, data.newPassword);
       resetPasswordForm();
+      toast.success("Password changed successfully", {
+        position: "top-right",
+        autoClose: 3000,
+        theme: "colored",
+      });
     } catch (error) {
-      console.error("Password change failed:", error);
+      toast.error(error.message || "Failed to change password", {
+        position: "top-right",
+        autoClose: 3000,
+        theme: "colored",
+      });
     }
   };
 
   const renderProfileTab = () => (
     <div className="space-y-6">
       {/* Avatar Section */}
-      <Card className="p-6">
-        <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
+      <Card className="p-6 border border-blue-200 bg-white">
+        <h3 className="text-lg font-semibold text-blue-800 mb-4 flex items-center gap-2">
+          <Camera className="h-5 w-5 text-blue-500" />
           Profile Photo
         </h3>
         <div className="flex items-center space-x-6">
@@ -136,15 +164,15 @@ const ProfilePage = () => {
               <img
                 src={previewUrl}
                 alt="Profile"
-                className="w-24 h-24 rounded-full object-cover"
+                className="w-32 h-32 rounded-full object-cover border-4 border-blue-200"
               />
             ) : (
-              <div className="w-24 h-24 rounded-full bg-gray-300 dark:bg-gray-600 flex items-center justify-center">
-                <User className="h-8 w-8 text-gray-500" />
+              <div className="w-32 h-32 rounded-full bg-white border-4 border-blue-200 flex items-center justify-center">
+                <User className="h-12 w-12 text-blue-500" />
               </div>
             )}
-            <label className="absolute bottom-0 right-0 bg-blue-600 text-white p-2 rounded-full cursor-pointer hover:bg-blue-700">
-              <Camera className="h-4 w-4" />
+            <label className="absolute bottom-0 right-0 bg-blue-600 text-white p-3 rounded-full cursor-pointer hover:bg-blue-700 transition-colors duration-200">
+              <Camera className="h-5 w-5" />
               <input
                 type="file"
                 accept="image/*"
@@ -154,118 +182,128 @@ const ProfilePage = () => {
             </label>
           </div>
           <div>
-            <p className="text-sm text-gray-600 dark:text-gray-400">
-              Upload a new profile photo. JPG, PNG or GIF (max 5MB)
+            <p className="text-sm text-blue-800">
+              Upload a new profile photo (JPG, PNG, GIF, max 5MB)
             </p>
-            <Button variant="outline" size="sm" className="mt-2">
-              Remove Photo
-            </Button>
+            {previewUrl && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleRemoveAvatar}
+                className="mt-4 border-blue-200 text-blue-600 hover:bg-blue-200 transition-colors duration-200"
+              >
+                <Trash2 className="h-4 w-4 mr-2" />
+                Remove Photo
+              </Button>
+            )}
           </div>
         </div>
       </Card>
 
       {/* Personal Information */}
-      <Card className="p-6">
-        <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
+      <Card className="p-6 border border-blue-200 bg-white">
+        <h3 className="text-lg font-semibold text-blue-800 mb-4 flex items-center gap-2">
+          <User className="h-5 w-5 text-blue-500" />
           Personal Information
         </h3>
         <form
           onSubmit={handleProfileSubmit(handleProfileUpdate)}
-          className="space-y-4"
+          className="space-y-6"
         >
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                First Name
+              <label className="block text-sm font-medium text-blue-800 mb-2">
+                Name
               </label>
               <Input
-                {...registerProfile("firstName")}
-                error={profileErrors.firstName?.message}
+                {...registerProfile("name")}
+                error={profileErrors.name?.message}
+                className="border-blue-200 bg-white text-blue-800 focus:ring-purple-500 focus:border-purple-500"
+                leftIcon={<User className="h-4 w-4 text-blue-500" />}
               />
             </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Last Name
-              </label>
-              <Input
-                {...registerProfile("lastName")}
-                error={profileErrors.lastName?.message}
-              />
-            </div>
-          </div>
-
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            <label className="block text-sm font-medium text-blue-800 mb-2">
               Email Address
             </label>
             <Input
               type="email"
               {...registerProfile("email")}
               error={profileErrors.email?.message}
+              className="border-blue-200 bg-white text-blue-800 focus:ring-purple-500 focus:border-purple-500"
+              leftIcon={<Mail className="h-4 w-4 text-blue-500" />}
             />
           </div>
+          </div>
+
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            <label className="block text-sm font-medium text-blue-800 mb-2">
               Phone Number
             </label>
             <Input
               type="tel"
               {...registerProfile("phone")}
               error={profileErrors.phone?.message}
+              className="border-blue-200 bg-white text-blue-800 focus:ring-purple-500 focus:border-purple-500"
+              leftIcon={<Phone className="h-4 w-4 text-blue-500" />}
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            <label className="block text-sm font-medium text-blue-800 mb-2">
               Address
             </label>
             <Input
               {...registerProfile("address")}
               error={profileErrors.address?.message}
+              className="border-blue-200 bg-white text-blue-800 focus:ring-purple-500 focus:border-purple-500"
+              leftIcon={<MapPin className="h-4 w-4 text-blue-500" />}
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            <label className="block text-sm font-medium text-blue-800 mb-2">
               Bio
             </label>
             <textarea
               {...registerProfile("bio")}
               rows={4}
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+              className="w-full px-3 py-2 border border-blue-200 bg-white text-blue-800 rounded-md focus:ring-purple-500 focus:border-purple-500"
               placeholder="Tell us about yourself..."
             />
             {profileErrors.bio && (
-              <p className="mt-1 text-sm text-red-600 dark:text-red-400">
+              <p className="mt-1 text-sm text-purple-600">
                 {profileErrors.bio.message}
               </p>
             )}
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <label className="block text-sm font-medium text-blue-800 mb-2">
                 Timezone
               </label>
               <select
                 {...registerProfile("timezone")}
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700"
+                className="w-full px-3 py-2 border border-blue-200 bg-white text-blue-800 rounded-md focus:ring-purple-500 focus:border-purple-500"
               >
                 <option value="UTC">UTC</option>
-                <option value="America/New_York">Eastern Time</option>
-                <option value="America/Chicago">Central Time</option>
-                <option value="America/Denver">Mountain Time</option>
-                <option value="America/Los_Angeles">Pacific Time</option>
+                <option value="America/New_York">America/New York (EST)</option>
+                <option value="America/Chicago">America/Chicago (CST)</option>
+                <option value="America/Denver">America/Denver (MST)</option>
+                <option value="America/Los_Angeles">
+                  America/Los Angeles (PST)
+                </option>
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <label className="block text-sm font-medium text-blue-800 mb-2">
                 Language
               </label>
               <select
                 {...registerProfile("language")}
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700"
+                className="w-full px-3 py-2 border border-blue-200 bg-white text-blue-800 rounded-md focus:ring-purple-500 focus:border-purple-500"
               >
                 <option value="en">English</option>
                 <option value="es">Spanish</option>
@@ -276,8 +314,17 @@ const ProfilePage = () => {
           </div>
 
           <div className="flex justify-end">
-            <Button type="submit" disabled={isProfileSubmitting}>
-              <Save className="h-4 w-4 mr-2" />
+            <Button
+              type="submit"
+              disabled={isProfileSubmitting}
+              className="bg-blue-600 hover:bg-blue-700 text-white transition-colors duration-200"
+              variant="primary"
+            >
+              {isProfileSubmitting ? (
+                <LoadingSpinner size="sm" className="mr-2" />
+              ) : (
+                <Save className="h-4 w-4 mr-2" />
+              )}
               Save Changes
             </Button>
           </div>
@@ -289,16 +336,17 @@ const ProfilePage = () => {
   const renderSecurityTab = () => (
     <div className="space-y-6">
       {/* Change Password */}
-      <Card className="p-6">
-        <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
+      <Card className="p-6 border border-blue-200 bg-white">
+        <h3 className="text-lg font-semibold text-blue-800 mb-4 flex items-center gap-2">
+          <Lock className="h-5 w-5 text-blue-500" />
           Change Password
         </h3>
         <form
           onSubmit={handlePasswordSubmit(handlePasswordChange)}
-          className="space-y-4"
+          className="space-y-6"
         >
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            <label className="block text-sm font-medium text-blue-800 mb-2">
               Current Password
             </label>
             <div className="relative">
@@ -306,23 +354,25 @@ const ProfilePage = () => {
                 type={showCurrentPassword ? "text" : "password"}
                 {...registerPassword("currentPassword")}
                 error={passwordErrors.currentPassword?.message}
+                className="border-blue-200 bg-white text-blue-800 focus:ring-purple-500 focus:border-purple-500 pr-10"
+                leftIcon={<Lock className="h-4 w-4 text-blue-500" />}
               />
               <button
                 type="button"
                 onClick={() => setShowCurrentPassword(!showCurrentPassword)}
-                className="absolute right-3 top-1/2 transform -translate-y-1/2"
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-blue-500 hover:text-blue-600"
               >
                 {showCurrentPassword ? (
-                  <EyeOff className="h-4 w-4" />
+                  <EyeOff className="h-5 w-5" />
                 ) : (
-                  <Eye className="h-4 w-4" />
+                  <Eye className="h-5 w-5" />
                 )}
               </button>
             </div>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            <label className="block text-sm font-medium text-blue-800 mb-2">
               New Password
             </label>
             <div className="relative">
@@ -330,34 +380,48 @@ const ProfilePage = () => {
                 type={showNewPassword ? "text" : "password"}
                 {...registerPassword("newPassword")}
                 error={passwordErrors.newPassword?.message}
+                className="border-blue-200 bg-white text-blue-800 focus:ring-purple-500 focus:border-purple-500 pr-10"
+                leftIcon={<Lock className="h-4 w-4 text-blue-500" />}
               />
               <button
                 type="button"
                 onClick={() => setShowNewPassword(!showNewPassword)}
-                className="absolute right-3 top-1/2 transform -translate-y-1/2"
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-blue-500 hover:text-blue-600"
               >
                 {showNewPassword ? (
-                  <EyeOff className="h-4 w-4" />
+                  <EyeOff className="h-5 w-5" />
                 ) : (
-                  <Eye className="h-4 w-4" />
+                  <Eye className="h-5 w-5" />
                 )}
               </button>
             </div>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            <label className="block text-sm font-medium text-blue-800 mb-2">
               Confirm New Password
             </label>
             <Input
               type="password"
               {...registerPassword("confirmPassword")}
               error={passwordErrors.confirmPassword?.message}
+              className="border-blue-200 bg-white text-blue-800 focus:ring-purple-500 focus:border-purple-500"
+              leftIcon={<Lock className="h-4 w-4 text-blue-500" />}
             />
           </div>
 
           <div className="flex justify-end">
-            <Button type="submit" disabled={isPasswordSubmitting}>
+            <Button
+              type="submit"
+              disabled={isPasswordSubmitting}
+              className="bg-blue-600 hover:bg-blue-700 text-white transition-colors duration-200"
+              variant="primary"
+            >
+              {isPasswordSubmitting ? (
+                <LoadingSpinner size="sm" className="mr-2" />
+              ) : (
+                <Save className="h-4 w-4 mr-2" />
+              )}
               Update Password
             </Button>
           </div>
@@ -365,125 +429,234 @@ const ProfilePage = () => {
       </Card>
 
       {/* Two-Factor Authentication */}
-      <Card className="p-6">
-        <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
+      <Card className="p-6 border border-blue-200 bg-white">
+        <h3 className="text-lg font-semibold text-blue-800 mb-4 flex items-center gap-2">
+          <Shield className="h-5 w-5 text-blue-500" />
           Two-Factor Authentication
         </h3>
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-sm text-gray-600 dark:text-gray-400">
+            <p className="text-sm font-medium text-blue-800">
               Add an extra layer of security to your account
             </p>
+            <p className="text-sm text-blue-600">
+              Enable 2FA via authenticator app or SMS
+            </p>
           </div>
-          <Button variant="outline">Enable 2FA</Button>
+          <Button
+            variant="outline"
+            className="border-blue-200 text-blue-600 hover:bg-blue-200 transition-colors duration-200"
+          >
+            Enable 2FA
+          </Button>
         </div>
       </Card>
 
       {/* Active Sessions */}
-      <Card className="p-6">
-        <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
+      <Card className="p-6 border border-blue-200 bg-white">
+        <h3 className="text-lg font-semibold text-blue-800 mb-4 flex items-center gap-2">
+          <Lock className="h-5 w-5 text-blue-500" />
           Active Sessions
         </h3>
-        <div className="space-y-3">
-          <div className="flex items-center justify-between p-3 border border-gray-200 dark:border-gray-700 rounded-lg">
+        <div className="space-y-4">
+          <div className="flex items-center justify-between p-4 bg-blue-50 rounded-lg">
             <div>
-              <p className="font-medium">Current Session</p>
-              <p className="text-sm text-gray-500">
-                Chrome on Windows • 192.168.1.1
+              <p className="font-medium text-blue-800">Current Session</p>
+              <p className="text-sm text-blue-600">
+                Chrome on Windows • 192.168.1.1 • Last active: Just now
               </p>
             </div>
-            <Badge variant="success">Active</Badge>
+            <Badge variant="success" className="bg-blue-100 text-blue-800">
+              Active
+            </Badge>
+          </div>
+          <div className="flex justify-end">
+            <Button
+              variant="outline"
+              className="border-purple-200 text-purple-600 hover:bg-purple-200 transition-colors duration-200"
+            >
+              <Trash2 className="h-4 w-4 mr-2" />
+              Sign Out All Other Sessions
+            </Button>
           </div>
         </div>
       </Card>
     </div>
   );
 
-  return (
-    <div className="max-w-4xl mx-auto p-6">
-      {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-          Profile Settings
-        </h1>
-        <p className="text-gray-600 dark:text-gray-400 mt-1">
-          Manage your account settings and preferences
-        </p>
-      </div>
-
-      {/* User Info Card */}
-      <Card className="p-6 mb-6">
-        <div className="flex items-center space-x-4">
-          {user?.avatar ? (
-            <img
-              src={user.avatar}
-              alt="Profile"
-              className="w-16 h-16 rounded-full object-cover"
-            />
-          ) : (
-            <div className="w-16 h-16 rounded-full bg-gray-300 dark:bg-gray-600 flex items-center justify-center">
-              <User className="h-8 w-8 text-gray-500" />
-            </div>
-          )}
+  const renderNotificationsTab = () => (
+    <Card className="p-6 border border-blue-200 bg-white">
+      <h3 className="text-lg font-semibold text-blue-800 mb-4 flex items-center gap-2">
+        <Bell className="h-5 w-5 text-blue-500" />
+        Notification Preferences
+      </h3>
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
-              {user?.firstName} {user?.lastName}
-            </h2>
-            <p className="text-gray-600 dark:text-gray-400">{user?.email}</p>
-            <Badge variant="secondary" className="mt-1">
-              {user?.role?.replace("_", " ").toUpperCase()}
-            </Badge>
+            <p className="font-medium text-blue-800">Email Notifications</p>
+            <p className="text-sm text-blue-600">Receive updates via email</p>
           </div>
+          <label className="relative inline-flex items-center cursor-pointer">
+            <input type="checkbox" className="sr-only peer" defaultChecked />
+            <div className="w-11 h-6 bg-blue-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-purple-500 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-blue-200 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+          </label>
         </div>
-      </Card>
-
-      {/* Tabs */}
-      <div className="flex space-x-1 mb-6 border-b border-gray-200 dark:border-gray-700">
-        {tabs.map((tab) => {
-          const Icon = tab.icon;
-          return (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              className={`
-                flex items-center space-x-2 px-4 py-2 border-b-2 transition-colors
-                ${
-                  activeTab === tab.id
-                    ? "border-blue-600 text-blue-600 dark:text-blue-400"
-                    : "border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
-                }
-              `}
-            >
-              <Icon className="h-4 w-4" />
-              <span>{tab.label}</span>
-            </button>
-          );
-        })}
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="font-medium text-blue-800">Push Notifications</p>
+            <p className="text-sm text-blue-600">Receive real-time alerts</p>
+          </div>
+          <label className="relative inline-flex items-center cursor-pointer">
+            <input type="checkbox" className="sr-only peer" />
+            <div className="w-11 h-6 bg-blue-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-purple-500 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-blue-200 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+          </label>
+        </div>
+        <div className="flex justify-end">
+          <Button
+            className="bg-blue-600 hover:bg-blue-700 text-white transition-colors duration-200"
+            variant="primary"
+          >
+            <Save className="h-4 w-4 mr-2" />
+            Save Preferences
+          </Button>
+        </div>
       </div>
+    </Card>
+  );
 
-      {/* Tab Content */}
-      {activeTab === "profile" && renderProfileTab()}
-      {activeTab === "security" && renderSecurityTab()}
-      {activeTab === "notifications" && (
-        <Card className="p-6">
-          <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
-            Notification Preferences
-          </h3>
-          <p className="text-gray-600 dark:text-gray-400">
-            Notification settings will be implemented here.
+  const renderPrivacyTab = () => (
+    <Card className="p-6 border border-blue-200 bg-white">
+      <h3 className="text-lg font-semibold text-blue-800 mb-4 flex items-center gap-2">
+        <Shield className="h-5 w-5 text-blue-500" />
+        Privacy Settings
+      </h3>
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="font-medium text-blue-800">Profile Visibility</p>
+            <p className="text-sm text-blue-600">
+              Control who can see your profile
+            </p>
+          </div>
+          <select className="px-3 py-2 border border-blue-200 bg-white text-blue-800 rounded-md focus:ring-purple-500 focus:border-purple-500">
+            <option value="public">Public</option>
+            <option value="contacts">Contacts Only</option>
+            <option value="private">Private</option>
+          </select>
+        </div>
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="font-medium text-blue-800">Data Sharing</p>
+            <p className="text-sm text-blue-600">
+              Allow data sharing with third parties
+            </p>
+          </div>
+          <label className="relative inline-flex items-center cursor-pointer">
+            <input type="checkbox" className="sr-only peer" />
+            <div className="w-11 h-6 bg-blue-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-purple-500 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-blue-200 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+          </label>
+        </div>
+        <div className="flex justify-end space-x-4">
+          <Button
+            variant="outline"
+            className="border-blue-200 text-blue-600 hover:bg-blue-200 transition-colors duration-200"
+          >
+            Download Data
+          </Button>
+          <Button
+            variant="outline"
+            className="border-purple-200 text-purple-600 hover:bg-purple-200 transition-colors duration-200"
+          >
+            <Trash2 className="h-4 w-4 mr-2" />
+            Delete Account
+          </Button>
+        </div>
+      </div>
+    </Card>
+  );
+
+  return (
+    <div className="min-h-screen bg-white p-6">
+      <div className="max-w-4xl mx-auto space-y-8">
+        {/* Header */}
+        <header>
+          <h1 className="text-3xl font-extrabold text-black tracking-tight">
+            Profile Settings
+          </h1>
+          <p className="mt-2 text-sm text-gray-600">
+            Manage your account settings and preferences
           </p>
+        </header>
+
+        {/* User Info Card */}
+        <Card className="p-6 border border-blue-200 bg-white">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-4">
+              {previewUrl ? (
+                <img
+                  src={previewUrl}
+                  alt="Profile"
+                  className="w-16 h-16 rounded-full object-cover border-2 border-blue-200"
+                />
+              ) : (
+                <div className="w-16 h-16 rounded-full bg-white border-2 border-blue-200 flex items-center justify-center">
+                  <User className="h-8 w-8 text-blue-500" />
+                </div>
+              )}
+              <div>
+                <h2 className="text-xl font-semibold text-blue-800">
+                  {user?.firstName} {user?.lastName}
+                </h2>
+                <p className="text-sm text-blue-600">{user?.email}</p>
+                <Badge
+                  variant="secondary"
+                  className="mt-1 bg-blue-100 text-blue-800"
+                >
+                  {user?.role?.replace("_", " ").toUpperCase()}
+                </Badge>
+              </div>
+            </div>
+            <Button
+              variant="outline"
+              onClick={() => setActiveTab("profile")}
+              className="border-blue-200 text-blue-600 hover:bg-blue-200 transition-colors duration-200"
+            >
+              <Edit className="h-4 w-4 mr-2" />
+              Edit Profile
+            </Button>
+          </div>
         </Card>
-      )}
-      {activeTab === "privacy" && (
-        <Card className="p-6">
-          <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
-            Privacy Settings
-          </h3>
-          <p className="text-gray-600 dark:text-gray-400">
-            Privacy controls will be implemented here.
-          </p>
-        </Card>
-      )}
+
+        {/* Tabs */}
+        <div className="bg-white border border-blue-200 rounded-lg p-2 flex space-x-2">
+          {tabs.map((tab) => {
+            const Icon = tab.icon;
+            return (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`
+                  flex-1 flex items-center justify-center space-x-2 px-4 py-3 rounded-md transition-colors duration-200
+                  ${
+                    activeTab === tab.id
+                      ? "bg-blue-600 text-white"
+                      : "text-blue-600 hover:bg-blue-200"
+                  }
+                `}
+              >
+                <Icon className="h-5 w-5" />
+                <span className="text-sm font-medium">{tab.label}</span>
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Tab Content */}
+        {activeTab === "profile" && renderProfileTab()}
+        {activeTab === "security" && renderSecurityTab()}
+        {activeTab === "notifications" && renderNotificationsTab()}
+        {activeTab === "privacy" && renderPrivacyTab()}
+      </div>
     </div>
   );
 };

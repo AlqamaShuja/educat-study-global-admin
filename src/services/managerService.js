@@ -78,6 +78,11 @@ const managerService = {
     return res;
   },
 
+  updateLead: async (id, data) => {
+    const response = await axios.put(`/manager/leads/${id}`, data);
+    return response.data;
+  },
+
   // Set a reminder for a lead
   async setLeadReminder(leadId, reminderData) {
     const res = await api.post(
@@ -175,6 +180,10 @@ const managerService = {
   deleteSchedule: async (id) => api.delete(`/manager/staff/schedules/${id}`),
 
   getStudents: async () => api.get("/manager/students"),
+  getReceptionist: async () => {
+    const response = await api.get("/manager/receptionists");
+    return response.data;
+  },
 };
 
 export default managerService;

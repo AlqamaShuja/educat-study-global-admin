@@ -166,7 +166,7 @@ export const routes = [
     roles: ['manager'],
   },
   {
-    path: '/manager/team',
+    path: '/manager/receptionist',
     component: TeamManagement,
     roles: ['manager'],
   },

@@ -1,5 +1,6 @@
 import { create } from "zustand"; // Use named import
 import managerService from "../services/managerService";
+import { toast } from "react-toastify";
 
 const useManagerStore = create((set, get) => ({
   leads: [],
@@ -8,6 +9,7 @@ const useManagerStore = create((set, get) => ({
   documents: [],
   dashboard: null,
   consultants: [],
+  receptionists: [],
   loading: false,
   error: null,
   schedules: [],
@@ -20,6 +22,7 @@ const useManagerStore = create((set, get) => ({
       set({ leads: res || [], loading: false });
     } catch (error) {
       console.error("Fetch leads error:", error);
+      toast.error(error || error.message || "Failed to fetch Leads");
       set({
         error: error.response?.data?.error || "Failed to fetch leads",
         loading: false,
@@ -165,6 +168,21 @@ const useManagerStore = create((set, get) => ({
       });
     }
   },
+  fetchOfficeReceptionist: async () => {
+    set({ loading: true, error: null });
+    try {
+      const res = await managerService.getReceptionist();
+      console.log("Fetched consultants:", res);
+      set({ receptionists: res || [], loading: false });
+      return res;
+    } catch (error) {
+      console.error("Fetch consultants error:", error);
+      set({
+        error: error.response?.data?.error || "Failed to fetch consultants",
+        loading: false,
+      });
+    }
+  },
 
   reassignLead: async (leadId, consultantId) => {
     set({ loading: true, error: null });
@@ -200,6 +218,7 @@ const useManagerStore = create((set, get) => ({
   },
   
   setSchedules: (schedules) => set({ schedules }),
+  setReceptionists: (data) => set({ receptionists: data, }),
 }));
 
 export default useManagerStore;

@@ -32,28 +32,14 @@ const SignupPage = () => {
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <div className="flex justify-center">
           <div className="flex items-center space-x-2">
-            <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-lg">A</span>
+            <div className="py-1 px-4 bg-blue-600 rounded-lg flex items-center justify-center">
+              <span className="text-white font-bold text-lg" title="Study Global">SG</span>
             </div>
             <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
               Admin Panel
             </h1>
           </div>
         </div>
-
-        <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900 dark:text-white">
-          Create your account
-        </h2>
-
-        <p className="mt-2 text-center text-sm text-gray-600 dark:text-gray-400">
-          Already have an account?{" "}
-          <Link
-            to="/auth/login"
-            className="font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400"
-          >
-            Sign in here
-          </Link>
-        </p>
       </div>
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
@@ -65,10 +51,6 @@ const SignupPage = () => {
             Account Types
           </h3>
           <div className="space-y-1 text-xs text-blue-700 dark:text-blue-300">
-            <p>
-              <strong>Student:</strong> Book appointments, upload documents,
-              track progress
-            </p>
             <p>
               <strong>Consultant:</strong> Manage students, schedule meetings,
               review applications
