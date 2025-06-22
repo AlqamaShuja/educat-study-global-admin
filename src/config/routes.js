@@ -208,9 +208,9 @@ export const routes = [
     roles: ['consultant'],
   },
   {
-    path: '/consultant/students',
+    path: `/consultant/students/:studentId`,
     component: StudentProfiles,
-    roles: ['consultant'],
+    roles: ['consultant', 'manager'],
   },
   {
     path: '/consultant/appointments',

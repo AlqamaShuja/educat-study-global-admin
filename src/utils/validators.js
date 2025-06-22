@@ -14,13 +14,33 @@ const URL_REGEX =
 // Existing validators from your code
 export const validateScheduleForm = (form) => {
   const errors = {};
-  if (!form.staffId) errors.staffId = "Staff selection is required";
-  if (!form.startTime) errors.startTime = "Start time is required";
-  if (!form.endTime) errors.endTime = "End time is required";
-  else if (new Date(form.endTime) <= new Date(form.startTime))
+
+  if (!form.studentId) {
+    errors.studentId = "Student is required";
+  }
+  if (!form.staffId) {
+    errors.staffId = "Staff member is required";
+  }
+  if (!form.startTime) {
+    errors.startTime = "Start time is required";
+  } else if (isNaN(new Date(form.startTime).getTime())) {
+    errors.startTime = "Invalid start time";
+  }
+  if (form.endTime && isNaN(new Date(form.endTime).getTime())) {
+    errors.endTime = "Invalid end time";
+  } else if (
+    form.endTime &&
+    new Date(form.endTime) <= new Date(form.startTime)
+  ) {
     errors.endTime = "End time must be after start time";
-  if (!form.type) errors.type = "Type is required";
-  if (!form.status) errors.status = "Status is required";
+  }
+  if (!form.type) {
+    errors.type = "Type is required";
+  }
+  if (!form.status) {
+    errors.status = "Status is required";
+  }
+
   return errors;
 };
 

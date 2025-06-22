@@ -14,6 +14,8 @@ const NotFoundPage = () => {
   };
 
   const handleGoHome = () => {
+    console.log(user, ":asjcnasascknasnca");
+    
     const pathname = getDefaultRouteByRole(user.role);
     navigate(pathname);
   };

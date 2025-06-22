@@ -7,29 +7,52 @@ import storage from "../utils/storage";
 const useAuthStore = create((set) => ({
   user: null,
   isAuthenticated: false,
-  loading: false,
+  loading: true,
 
   initializeAuth: () => {
     console.log("Initializing auth...");
     set({ loading: true });
-    const token = storage.getToken();
-    const user = storage.getUserData();
-    console.log("Token:", !!token, "User:", user);
+
+    const token = localStorage.getItem("authToken"); // storage.getToken();
+    const rawUser = localStorage.getItem("userData"); // storage.getUserData();
+
+    console.log("Token exists:", !!token, "Raw user:", rawUser);
+
     const isTokenExpired = (token) => {
       try {
         const [, payload] = token.split(".");
         const decoded = JSON.parse(atob(payload));
-        return decoded.exp * 1000 < Date.now();
-      } catch {
+        return decoded.exp * 1000 < Date.now(); // true if expired
+      } catch (error) {
+        console.error("Token parsing error:", error);
         return true;
       }
     };
-    if (token && user && !isTokenExpired(token)) {
-      set({ user, isAuthenticated: true, loading: false });
-      console.log("Auth initialized: User set");
+
+    if (token && rawUser && !isTokenExpired(token)) {
+      try {
+        const parsedUser = JSON.parse(rawUser);
+        set({
+          user: parsedUser,
+          isAuthenticated: true,
+          loading: false,
+        });
+        console.log("Auth initialized: User set");
+      } catch (err) {
+        console.error("Failed to parse user data:", err);
+        set({
+          user: null,
+          isAuthenticated: false,
+          loading: false,
+        });
+      }
     } else {
-      set({ user: null, isAuthenticated: false, loading: false });
-      console.log("Auth initialized: No user");
+      set({
+        user: null,
+        isAuthenticated: false,
+        loading: false,
+      });
+      console.log("Auth initialized: No valid token or user");
     }
   },
 
@@ -51,7 +74,9 @@ const useAuthStore = create((set) => ({
     set({ user: null, isAuthenticated: false });
   },
 
-  setUser: (user) => set({ user, isAuthenticated: !!user }),
+  setUser: (user) =>
+    set((state) => ({ ...state, user, isAuthenticated: !!user })),
+  setLoading: (val) => set((state) => ({ ...state, loading: val })),
 }));
 
 export default useAuthStore;

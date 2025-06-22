@@ -8,15 +8,7 @@ import LoadingSpinner from "../../components/ui/LoadingSpinner";
 import ConfirmDialog from "../../components/ui/ConfirmDialog";
 import DataTable from "../../components/tables/DataTable";
 import TableFilters from "../../components/tables/TableFilters";
-import {
-  Plus,
-  Edit,
-  Trash2,
-  MapPin,
-  Users,
-  Phone,
-  Mail,
-} from "lucide-react";
+import { Plus, Edit, Trash2, MapPin, Users, Phone, Mail } from "lucide-react";
 import useUIStore from "../../stores/uiStore";
 import OfficeFormModal from "../../components/forms/OfficeFormModal";
 
@@ -76,6 +68,7 @@ const OfficeManagement = () => {
     managerId: "",
     consultants: [],
     isActive: true,
+    isBranch: false,
   });
 
   useEffect(() => {
@@ -377,6 +370,15 @@ const OfficeManagement = () => {
       render: (_, office) => getStatusBadge(office.isActive),
     },
     {
+      key: "type",
+      header: "Type",
+      render: (_, office) => (
+        <Badge variant={office.isBranch ? "primary" : "success"}>
+          {office.isBranch ? "Branch Office" : "Our Office"}
+        </Badge>
+      ),
+    },
+    {
       key: "actions",
       header: "Actions",
       render: (_, office) => (
@@ -488,7 +490,7 @@ const OfficeManagement = () => {
 
       {/* Offices Table */}
       <Card className="bg-white rounded-2xl shadow-lg border border-blue-100 overflow-hidden">
-        <div className="bg-blue-600 text-white p-4 rounded-t-2xl">
+        <div className="bg-gradient-to-tr from-blue-700 to-purple-800 text-white p-4 rounded-t-2xl">
           <h2 className="text-lg font-semibold">All Offices</h2>
         </div>
         <DataTable

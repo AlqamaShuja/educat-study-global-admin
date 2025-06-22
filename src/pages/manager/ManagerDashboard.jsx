@@ -1,264 +1,33 @@
-import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
-import useApi from "../../hooks/useApi";
-import useTasks from "../../hooks/useTasks";
-import useAuthStore from "../../stores/authStore";
+import React, { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import useManagerStore from "../../stores/useManagerStore";
 import Card from "../../components/ui/Card";
 import Button from "../../components/ui/Button";
 import Badge from "../../components/ui/Badge";
 import LoadingSpinner from "../../components/ui/LoadingSpinner";
-import Toast from "../../components/ui/Toast";
-import DataTable from "../../components/tables/DataTable";
-import BarChart from "../../components/charts/BarChart";
-import {
-  Users,
-  Target,
-  CheckSquare,
-  AlertCircle,
-  Plus,
-  Edit,
-  Calendar,
-  TrendingUp,
-  UserCheck,
-} from "lucide-react";
+import { Users, FileText, CheckCircle, Clock } from "lucide-react";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const ManagerDashboard = () => {
-  const { user } = useAuthStore();
-  const { callApi, services, loading: apiLoading, error: apiError } = useApi();
-  const { getTasks, loading: taskLoading, error: taskError } = useTasks();
-  const [metrics, setMetrics] = useState({
-    totalLeads: 0,
-    activeTasks: 0,
-    teamMembers: 0,
-    conversionRate: 0,
-  });
-  const [recentTasks, setRecentTasks] = useState([]);
-  const [teamPerformance, setTeamPerformance] = useState([]);
-  const [toast, setToast] = useState({
-    show: false,
-    message: "",
-    type: "success",
-  });
-
-  const taskStatuses = [
-    {
-      value: "pending",
-      label: "Pending",
-      color: "bg-yellow-100 text-yellow-800",
-    },
-    {
-      value: "in_progress",
-      label: "In Progress",
-      color: "bg-blue-100 text-blue-800",
-    },
-    {
-      value: "completed",
-      label: "Completed",
-      color: "bg-green-100 text-green-800",
-    },
-    { value: "overdue", label: "Overdue", color: "bg-red-100 text-red-800" },
-  ];
+  const navigate = useNavigate();
+  const { dashboard, leads, fetchDashboard, fetchLeads, loading, error } =
+    useManagerStore();
 
   useEffect(() => {
-    if (user) {
-      fetchMetrics();
-      fetchRecentTasks();
-      fetchTeamPerformance();
+    console.log("Fetching dashboard and leads...");
+    fetchDashboard();
+    fetchLeads();
+  }, []);
+
+  useEffect(() => {
+    if (error) {
+      console.error("Dashboard error:", error);
+      toast.error(error);
     }
-  }, [user]);
+  }, [error]);
 
-  const fetchMetrics = async () => {
-    try {
-      const [leadsResponse, tasksResponse, teamResponse] = await Promise.all([
-        callApi(services.lead.getLeads),
-        callApi(services.task.getTasks),
-        callApi(services.user.getTeamMembers), // Assuming endpoint for team data
-      ]);
-      setMetrics({
-        totalLeads: leadsResponse?.length || 0,
-        activeTasks:
-          tasksResponse?.filter((task) => task.status !== "completed").length ||
-          0,
-        teamMembers: teamResponse?.length || 0,
-        conversionRate: calculateConversionRate(leadsResponse) || 0,
-      });
-    } catch (error) {
-      setToast({
-        show: true,
-        message: apiError || "Failed to fetch metrics",
-        type: "error",
-      });
-    }
-  };
-
-  const fetchRecentTasks = async () => {
-    try {
-      const tasks = await getTasks();
-      const tasksWithStatus = tasks
-        .map((task) => ({
-          ...task,
-          status:
-            new Date(task.dueDate) < new Date() && task.status !== "completed"
-              ? "overdue"
-              : task.status,
-        }))
-        .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
-        .slice(0, 5); // Limit to 5 recent tasks
-      setRecentTasks(tasksWithStatus);
-    } catch (error) {
-      setToast({
-        show: true,
-        message: taskError || "Failed to fetch tasks",
-        type: "error",
-      });
-    }
-  };
-
-  const fetchTeamPerformance = async () => {
-    try {
-      const response = await callApi(services.report.getConsultantPerformance); // Assuming endpoint
-      setTeamPerformance(
-        response?.map((member) => ({
-          id: member.id,
-          name: member.name,
-          leadsAssigned: member.leadsAssigned || 0,
-          leadsConverted: member.leadsConverted || 0,
-          tasksCompleted: member.tasksCompleted || 0,
-          conversionRate:
-            ((member.leadsConverted / member.leadsAssigned) * 100).toFixed(1) ||
-            0,
-        })) || []
-      );
-    } catch (error) {
-      setToast({
-        show: true,
-        message: apiError || "Failed to fetch team performance",
-        type: "error",
-      });
-    }
-  };
-
-  const calculateConversionRate = (leads) => {
-    if (!leads?.length) return 0;
-    const converted = leads.filter(
-      (lead) => lead.status === "converted"
-    ).length;
-    return ((converted / leads.length) * 100).toFixed(1);
-  };
-
-  const getStatusColor = (status) =>
-    taskStatuses.find((s) => s.value === status)?.color ||
-    "bg-gray-100 text-gray-800";
-
-  const taskColumns = [
-    {
-      key: "title",
-      label: "Task",
-      render: (task) => (
-        <div>
-          <div className="font-medium text-gray-900">{task.title}</div>
-          <div className="text-sm text-gray-500">{task.description}</div>
-        </div>
-      ),
-    },
-    {
-      key: "student",
-      label: "Student",
-      render: (task) => (
-        <div className="flex items-center">
-          <UserCheck className="h-4 w-4 text-gray-400 mr-2" />
-          <span className="text-sm">{task.studentName || "Unknown"}</span>
-        </div>
-      ),
-    },
-    {
-      key: "status",
-      label: "Status",
-      render: (task) => (
-        <Badge className={getStatusColor(task.status)}>
-          {taskStatuses.find((s) => s.value === task.status)?.label}
-        </Badge>
-      ),
-    },
-    {
-      key: "dueDate",
-      label: "Due Date",
-      render: (task) => {
-        const dueDate = new Date(task.dueDate);
-        const isOverdue = dueDate < new Date() && task.status !== "completed";
-        return (
-          <div
-            className={`flex items-center text-sm ${
-              isOverdue ? "text-red-600" : "text-gray-600"
-            }`}
-          >
-            <Calendar className="h-4 w-4 mr-1" />
-            {dueDate.toLocaleDateString()}
-          </div>
-        );
-      },
-    },
-    {
-      key: "actions",
-      label: "Actions",
-      render: (task) => (
-        <Link to={`/manager/tasks/${task.id}`}>
-          <Button size="sm" variant="outline">
-            <Edit className="h-4 w-4" />
-          </Button>
-        </Link>
-      ),
-    },
-  ];
-
-  const teamColumns = [
-    {
-      key: "name",
-      label: "Consultant",
-      render: (member) => (
-        <div className="flex items-center">
-          <Users className="h-4 w-4 text-gray-400 mr-2" />
-          <span className="text-sm">{member.name}</span>
-        </div>
-      ),
-    },
-    { key: "leadsAssigned", label: "Leads Assigned" },
-    { key: "leadsConverted", label: "Leads Converted" },
-    { key: "tasksCompleted", label: "Tasks Completed" },
-    {
-      key: "conversionRate",
-      label: "Conversion Rate (%)",
-      render: (member) => (
-        <Badge
-          className={
-            member.conversionRate > 50
-              ? "bg-green-100 text-green-800"
-              : "bg-yellow-100 text-yellow-800"
-          }
-        >
-          {member.conversionRate}%
-        </Badge>
-      ),
-    },
-  ];
-
-  const chartData = {
-    labels: teamPerformance.map((member) => member.name),
-    datasets: [
-      {
-        label: "Leads Converted",
-        data: teamPerformance.map((member) => member.leadsConverted),
-        backgroundColor: "rgba(75, 192, 192, 0.6)",
-      },
-      {
-        label: "Tasks Completed",
-        data: teamPerformance.map((member) => member.tasksCompleted),
-        backgroundColor: "rgba(153, 102, 255, 0.6)",
-      },
-    ],
-  };
-
-  if (apiLoading || taskLoading) {
+  if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
         <LoadingSpinner size="lg" />
@@ -267,14 +36,7 @@ const ManagerDashboard = () => {
   }
 
   return (
-    <div className="space-y-6">
-      <Toast
-        isOpen={toast.show}
-        message={toast.message}
-        type={toast.type}
-        onClose={() => setToast({ ...toast, show: false })}
-      />
-
+    <div className="p-6 space-y-6 bg-gradient-to-br from-gray-50 to-gray-100 min-h-screen">
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
@@ -282,123 +44,106 @@ const ManagerDashboard = () => {
             Manager Dashboard
           </h1>
           <p className="text-gray-600">
-            Welcome, {user?.name || "Manager"}! Overview of your office
-            operations.
+            Overview of office performance and leads
           </p>
         </div>
         <div className="flex space-x-3">
-          <Link to="/manager/lead-assignment">
-            <Button>
-              <Plus className="h-4 w-4 mr-2" />
-              Assign Lead
-            </Button>
-          </Link>
-          <Link to="/manager/task-management">
-            <Button>
-              <Plus className="h-4 w-4 mr-2" />
-              Create Task
-            </Button>
-          </Link>
+          <Button
+            variant="outline"
+            onClick={() => navigate("/manager/performance")}
+          >
+            <Users className="h-4 w-4 mr-2" />
+            View Consultants
+          </Button>
+          <Button variant="outline" onClick={() => navigate("/manager/leads")}>
+            <FileText className="h-4 w-4 mr-2" />
+            Manage Leads
+          </Button>
         </div>
       </div>
 
-      {/* Metrics */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card className="p-4">
+      {/* Dashboard Metrics */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <Card title="Total Leads">
           <div className="flex items-center">
-            <Target className="h-8 w-8 text-blue-500" />
-            <div className="ml-3">
-              <p className="text-sm font-medium text-gray-600">Total Leads</p>
-              <p className="text-2xl font-bold text-gray-900">
-                {metrics.totalLeads}
-              </p>
-            </div>
+            <FileText className="h-8 w-8 text-blue-500 mr-3" />
+            <p className="text-3xl font-bold text-gray-900">
+              {dashboard?.totalLeads || 0}
+            </p>
           </div>
         </Card>
-        <Card className="p-4">
+        <Card title="Converted Leads">
           <div className="flex items-center">
-            <CheckSquare className="h-8 w-8 text-yellow-500" />
-            <div className="ml-3">
-              <p className="text-sm font-medium text-gray-600">Active Tasks</p>
-              <p className="text-2xl font-bold text-gray-900">
-                {metrics.activeTasks}
-              </p>
-            </div>
+            <CheckCircle className="h-8 w-8 text-green-500 mr-3" />
+            <p className="text-3xl font-bold text-gray-900">
+              {dashboard?.convertedLeads || 0}
+            </p>
           </div>
         </Card>
-        <Card className="p-4">
+        <Card title="Conversion Rate">
           <div className="flex items-center">
-            <Users className="h-8 w-8 text-green-500" />
-            <div className="ml-3">
-              <p className="text-sm font-medium text-gray-600">Team Members</p>
-              <p className="text-2xl font-bold text-gray-900">
-                {metrics.teamMembers}
-              </p>
-            </div>
+            <CheckCircle className="h-8 w-8 text-blue-500 mr-3" />
+            <p className="text-3xl font-bold text-gray-900">
+              {((dashboard?.conversionRate || 0) * 100).toFixed(2)}%
+            </p>
           </div>
         </Card>
-        <Card className="p-4">
+        <Card title="Pending Appointments">
           <div className="flex items-center">
-            <TrendingUp className="h-8 w-8 text-purple-500" />
-            <div className="ml-3">
-              <p className="text-sm font-medium text-gray-600">
-                Conversion Rate
-              </p>
-              <p className="text-2xl font-bold text-gray-900">
-                {metrics.conversionRate}%
-              </p>
-            </div>
+            <Clock className="h-8 w-8 text-yellow-500 mr-3" />
+            <p className="text-3xl font-bold text-gray-900">
+              {dashboard?.pendingAppointments || 0}
+            </p>
           </div>
         </Card>
       </div>
 
-      {/* Recent Tasks */}
-      <Card className="p-4">
-        <div className="flex justify-between items-center mb-4">
-          <h3 className="text-lg font-semibold">Recent Tasks</h3>
-          <Link to="/manager/task-management">
-            <Button variant="outline">View All Tasks</Button>
-          </Link>
-        </div>
-        {recentTasks.length === 0 ? (
-          <div className="text-center py-8">
-            <CheckSquare className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-            <p className="text-gray-600">No recent tasks found.</p>
+      {/* Recent Leads */}
+      <Card title="Recent Leads">
+        {leads.length ? (
+          <div className="space-y-4">
+            {leads.slice(0, 5).map((lead) => (
+              <div
+                key={lead.id}
+                className="flex items-center justify-between p-3 border-b border-gray-200"
+              >
+                <div>
+                  <p className="text-sm font-medium text-gray-900">
+                    {lead.student?.name || "N/A"}
+                  </p>
+                  <p className="text-xs text-gray-500">
+                    {lead.student?.email || "N/A"}
+                  </p>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Badge
+                    className={
+                      lead.status === "converted"
+                        ? "bg-green-100 text-green-800"
+                        : lead.status === "in_progress"
+                        ? "bg-blue-100 text-blue-800"
+                        : lead.status === "lost"
+                        ? "bg-red-100 text-red-800"
+                        : "bg-gray-100 text-gray-800"
+                    }
+                  >
+                    {lead.status || "new"}
+                  </Badge>
+                  {/* <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() =>
+                      navigate(`/consultant/students/${lead.studentId}`)
+                    }
+                  >
+                    View Profile
+                  </Button> */}
+                </div>
+              </div>
+            ))}
           </div>
         ) : (
-          <DataTable
-            data={recentTasks}
-            columns={taskColumns}
-            pagination={false}
-          />
-        )}
-      </Card>
-
-      {/* Team Performance */}
-      <Card className="p-4">
-        <div className="flex justify-between items-center mb-4">
-          <h3 className="text-lg font-semibold">Team Performance</h3>
-          <Link to="/manager/consultant-performance">
-            <Button variant="outline">View Detailed Reports</Button>
-          </Link>
-        </div>
-        {teamPerformance.length === 0 ? (
-          <div className="text-center py-8">
-            <Users className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-            <p className="text-gray-600">No team performance data available.</p>
-          </div>
-        ) : (
-          <>
-            <div className="h-64 mb-4">
-              <BarChart data={chartData} />
-            </div>
-            <DataTable
-              data={teamPerformance}
-              columns={teamColumns}
-              pagination={true}
-              pageSize={5}
-            />
-          </>
+          <p className="text-gray-500 text-sm">No leads available</p>
         )}
       </Card>
     </div>

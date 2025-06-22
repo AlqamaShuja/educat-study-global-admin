@@ -4,6 +4,7 @@ import Input from "../../components/ui/Input";
 import Button from "../../components/ui/Button";
 import useUserStore from "../../stores/userStore";
 import useOfficeStore from "../../stores/officeStore";
+import Switch from "../../components/ui/Switch";
 
 const OfficeFormModal = ({
   isOpen,
@@ -29,7 +30,7 @@ const OfficeFormModal = ({
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} title={title} size="xl">
-      <div className="space-y-6 max-h-[70vh] overflow-y-auto bg-blue-50 p-6 rounded-lg">
+      <div className="space-y-6 bg-blue-50 p-6 rounded-lg">
         <div className="space-y-4">
           <h3 className="text-lg font-semibold text-blue-600 border-b border-blue-200 pb-2">
             Basic Information
@@ -66,6 +67,20 @@ const OfficeFormModal = ({
               />
               Active Office
             </label>
+          </div>
+          <div className="flex items-center gap-3">
+            <Switch
+              checked={formData.isBranch}
+              onChange={(checked) =>
+                setFormData((prev) => ({
+                  ...prev,
+                  isBranch: checked,
+                }))
+              }
+              label="Branch Office"
+              color="primary"
+              size="medium"
+            />
           </div>
         </div>
         <div className="space-y-4">

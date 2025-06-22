@@ -19,6 +19,9 @@ const Header = ({ onMenuClick, onSidebarToggle, user }) => {
   };
 
   const getPageTitle = () => {
+    if(location.pathname.includes("/consultant/students/")){
+        return 'Student Profile'
+    }
     const pathSegments = location.pathname.split("/").filter(Boolean);
     if (pathSegments.length === 0) return "Dashboard";
 

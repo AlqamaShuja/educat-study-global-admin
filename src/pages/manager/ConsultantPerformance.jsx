@@ -1,242 +1,111 @@
-import React, { useState, useEffect } from "react";
-import useApi from "../../hooks/useApi";
-import useAuthStore from "../../stores/authStore";
-import usePermissions from "../../hooks/usePermissions";
-import { validateInput } from "../../utils/validators";
+import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import useManagerStore from "../../stores/useManagerStore";
+import managerService from "../../services/managerService";
+import AddOrEditConsultantModal from "../../components/manager/AddOrEditConsultantModal";
+import ConfirmDeleteConsultantModal from "../../components/manager/ConfirmDeleteConsultantModal";
+import ConsultantLeadsModal from "../../components/manager/ConsultantLeadsModal";
 import Card from "../../components/ui/Card";
 import Button from "../../components/ui/Button";
 import Badge from "../../components/ui/Badge";
-import Input from "../../components/ui/Input";
 import LoadingSpinner from "../../components/ui/LoadingSpinner";
-import Toast from "../../components/ui/Toast";
-import DataTable from "../../components/tables/DataTable";
-import { BarChart, LineChart } from "../../components/charts";
-import {
-  BarChart2,
-  Download,
-  Search,
-  Users,
-  Target,
-  Shield,
-} from "lucide-react";
-import { saveAs } from "file-saver";
-import Papa from "papaparse";
+import { Users, User, Edit2, Trash2, Eye } from "lucide-react";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const ConsultantPerformance = () => {
-  const { user } = useAuthStore();
-  const { callApi, services, loading: apiLoading, error: apiError } = useApi();
-  const { hasPermission } = usePermissions();
-  const [performanceData, setPerformanceData] = useState([]);
-  const [consultants, setConsultants] = useState([]);
-  const [filters, setFilters] = useState({
-    startDate: "",
-    endDate: "",
-    consultantId: "",
-  });
-  const [toast, setToast] = useState({
-    show: false,
-    message: "",
-    type: "success",
-  });
+  const navigate = useNavigate();
+  const { consultants, fetchOfficeConsultants, loading, error } =
+    useManagerStore();
+  const [reports, setReports] = useState([]);
+  const [isLoadingReports, setIsLoadingReports] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedConsultant, setSelectedConsultant] = useState(null);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [consultantToDelete, setConsultantToDelete] = useState(null);
+  const [isLeadsModalOpen, setIsLeadsModalOpen] = useState(false);
+  const [selectedConsultantForLeads, setSelectedConsultantForLeads] =
+    useState(null);
 
+  // Fetch consultants and reports
   useEffect(() => {
-    if (user && hasPermission("view", "performance")) {
-      fetchConsultants();
-      fetchPerformanceData();
-    }
-  }, [user, filters]);
+    console.log("Fetching consultants and reports...");
+    fetchOfficeConsultants();
+    // const fetchReports = async () => {
+    //   setIsLoadingReports(true);
+    //   try {
+    //     const res = await managerService.getStaffReports();
+    //     console.log('Fetched reports:', res.data);
+    //     setReports(res.data || []);
+    //   } catch (err) {
+    //     console.error('Fetch reports error:', err);
+    //     toast.error(
+    //       err.response?.data?.error || 'Failed to fetch performance reports'
+    //     );
+    //   } finally {
+    //     setIsLoadingReports(false);
+    //   }
+    // };
+    // fetchReports();
+  }, [fetchOfficeConsultants]);
 
-  const fetchConsultants = async () => {
+  // Handle errors
+  useEffect(() => {
+    if (error) {
+      console.error("Consultant error:", error);
+      toast.error(error);
+    }
+  }, [error]);
+
+  // Handle modal submit (create or update)
+  const handleModalSubmit = async (formData) => {
     try {
-      const response = await callApi(services.user.getTeamMembers);
-      setConsultants(
-        response
-          ?.filter((member) => member.role === "consultant")
-          .map((member) => ({
-            id: member.id,
-            name: validateInput(member.name),
-          })) || []
-      );
-    } catch (error) {
-      setToast({
-        show: true,
-        message: apiError || "Failed to fetch consultants",
-        type: "error",
-      });
+      await managerService.createStaffMember(formData); // Handles both create and update
+      await fetchOfficeConsultants(); // Refresh consultants list
+    } catch (err) {
+      throw err; // Let modal handle error
     }
   };
 
-  const fetchPerformanceData = async () => {
+  // Handle delete consultant
+  const openDeleteModal = (consultant) => {
+    setConsultantToDelete(consultant);
+    setIsDeleteModalOpen(true);
+  };
+
+  const handleDelete = async () => {
     try {
-      const params = {
-        startDate: filters.startDate,
-        endDate: filters.endDate,
-        consultantId: filters.consultantId,
-      };
-      const response = await callApi(
-        services.performance.getPerformance,
-        params
+      await managerService.disconnectStaffMember(consultantToDelete.id);
+      toast.success("Consultant disconnected successfully");
+      await fetchOfficeConsultants(); // Refresh consultants list
+      setIsDeleteModalOpen(false);
+      setConsultantToDelete(null);
+    } catch (err) {
+      toast.error(
+        err.response?.data?.message || "Failed to disconnect consultant"
       );
-      setPerformanceData(
-        response?.map((data) => ({
-          consultantId: data.consultantId,
-          name: validateInput(data.name || "Unknown"),
-          leadsAssigned: data.leadsAssigned || 0,
-          leadsConverted: data.leadsConverted || 0,
-          tasksCompleted: data.tasksCompleted || 0,
-          conversionRate: (
-            (data.leadsConverted / (data.leadsAssigned || 1)) *
-            100
-          ).toFixed(1),
-          scheduleAdherence: (data.scheduleAdherence || 0).toFixed(1),
-          evaluationDate: new Date(data.evaluationDate).toLocaleDateString(),
-        })) || []
-      );
-    } catch (error) {
-      setToast({
-        show: true,
-        message: apiError || "Failed to fetch performance data",
-        type: "error",
-      });
     }
   };
 
-  const handleExportCSV = () => {
-    if (!performanceData.length) {
-      setToast({ show: true, message: "No data to export", type: "error" });
-      return;
-    }
-
-    const csvData = performanceData.map((data) => ({
-      "Consultant Name": data.name,
-      "Leads Assigned": data.leadsAssigned,
-      "Leads Converted": data.leadsConverted,
-      "Tasks Completed": data.tasksCompleted,
-      "Conversion Rate (%)": data.conversionRate,
-      "Schedule Adherence (%)": data.scheduleAdherence,
-      "Evaluation Date": data.evaluationDate,
-    }));
-
-    const csv = Papa.unparse(csvData);
-    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-    saveAs(
-      blob,
-      `consultant_performance_${new Date().toISOString().slice(0, 10)}.csv`
-    );
-    setToast({
-      show: true,
-      message: "Performance data exported as CSV",
-      type: "success",
-    });
+  // Open modal for adding
+  const openAddModal = () => {
+    setSelectedConsultant(null);
+    setIsModalOpen(true);
   };
 
-  const getBarChartData = () => {
-    return {
-      labels: performanceData.map((data) => data.name),
-      datasets: [
-        {
-          label: "Leads Converted",
-          data: performanceData.map((data) => data.leadsConverted),
-          backgroundColor: "rgba(75, 192, 192, 0.6)",
-        },
-        {
-          label: "Tasks Completed",
-          data: performanceData.map((data) => data.tasksCompleted),
-          backgroundColor: "rgba(153, 102, 255, 0.6)",
-        },
-      ],
-    };
+  // Open modal for editing
+  const openEditModal = (consultant) => {
+    setSelectedConsultant(consultant);
+    setIsModalOpen(true);
   };
 
-  const getLineChartData = () => {
-    return {
-      labels: performanceData.map((data) => data.evaluationDate),
-      datasets: [
-        {
-          label: "Conversion Rate (%)",
-          data: performanceData.map((data) => data.conversionRate),
-          borderColor: "rgba(255, 99, 132, 1)",
-          fill: false,
-        },
-        {
-          label: "Schedule Adherence (%)",
-          data: performanceData.map((data) => data.scheduleAdherence),
-          borderColor: "rgba(54, 162, 235, 1)",
-          fill: false,
-        },
-      ],
-    };
+  // Open modal for viewing leads
+  const openLeadsModal = (consultant) => {
+    setSelectedConsultantForLeads(consultant);
+    setIsLeadsModalOpen(true);
   };
 
-  const columns = [
-    {
-      key: "name",
-      label: "Consultant",
-      render: (data) => (
-        <div className="flex items-center">
-          <Users className="h-4 w-4 text-gray-400 mr-2" />
-          <span className="text-sm">{data.name}</span>
-        </div>
-      ),
-    },
-    {
-      key: "leadsAssigned",
-      label: "Leads Assigned",
-      render: (data) => <span className="text-sm">{data.leadsAssigned}</span>,
-    },
-    {
-      key: "leadsConverted",
-      label: "Leads Converted",
-      render: (data) => <span className="text-sm">{data.leadsConverted}</span>,
-    },
-    {
-      key: "tasksCompleted",
-      label: "Tasks Completed",
-      render: (data) => <span className="text-sm">{data.tasksCompleted}</span>,
-    },
-    {
-      key: "conversionRate",
-      label: "Conversion Rate (%)",
-      render: (data) => (
-        <Badge
-          className={
-            data.conversionRate > 50
-              ? "bg-green-100 text-green-800"
-              : "bg-yellow-100 text-yellow-800"
-          }
-        >
-          {data.conversionRate}%
-        </Badge>
-      ),
-    },
-    {
-      key: "scheduleAdherence",
-      label: "Schedule Adherence (%)",
-      render: (data) => (
-        <Badge
-          className={
-            data.scheduleAdherence > 80
-              ? "bg-green-100 text-green-800"
-              : "bg-red-100 text-red-800"
-          }
-        >
-          {data.scheduleAdherence}%
-        </Badge>
-      ),
-    },
-    {
-      key: "evaluationDate",
-      label: "Evaluation Date",
-      render: (data) => (
-        <div className="flex items-center text-sm text-gray-600">
-          <Target className="h-4 w-4 mr-1" />
-          {data.evaluationDate}
-        </div>
-      ),
-    },
-  ];
-
-  if (apiLoading) {
+  if (loading || isLoadingReports) {
     return (
       <div className="flex items-center justify-center h-64">
         <LoadingSpinner size="lg" />
@@ -244,140 +113,402 @@ const ConsultantPerformance = () => {
     );
   }
 
-  if (!hasPermission("view", "performance")) {
-    return (
-      <div className="text-center py-8">
-        <Shield className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-        <h3 className="text-lg font-medium text-gray-900 mb-2">
-          Access Denied
-        </h3>
-        <p className="text-gray-600">
-          You do not have permission to view consultant performance.
-        </p>
-      </div>
-    );
-  }
-
   return (
-    <div className="space-y-6">
-      <Toast
-        isOpen={toast.show}
-        message={toast.message}
-        type={toast.type}
-        onClose={() => setToast({ ...toast, show: false })}
-      />
-
+    <div className="p-6 bg-gradient-to-br from-gray-50 to-gray-100 min-h-screen">
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">
-            Consultant Performance
-          </h1>
-          <p className="text-gray-600">
-            Evaluate and analyze consultant performance metrics.
-          </p>
+          <h1 className="text-2xl font-bold text-gray-900">Consultant</h1>
+          <p className="text-gray-600">Overview of consultant performance</p>
         </div>
-        <Button onClick={handleExportCSV} disabled={!performanceData.length}>
-          <Download className="h-4 w-4 mr-2" />
-          Export CSV
-        </Button>
+        <div className="flex space-x-3">
+          <Button
+            variant="outline"
+            onClick={() => navigate("/manager/schedules")}
+          >
+            <Users className="h-4 w-4 mr-2" />
+            View Schedules
+          </Button>
+          <Button variant="primary" onClick={openAddModal}>
+            <User className="h-4 w-4 mr-2" />
+            Add Consultant
+          </Button>
+        </div>
       </div>
 
-      {/* Filters */}
-      <Card className="p-4">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-            <Input
-              placeholder="Search consultants..."
-              value={filters.search}
-              onChange={(e) =>
-                setFilters({ ...filters, search: e.target.value })
-              }
-              className="pl-10"
-            />
-          </div>
-          <select
-            className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-            value={filters.consultantId}
-            onChange={(e) =>
-              setFilters({ ...filters, consultantId: e.target.value })
-            }
-          >
-            <option value="">All Consultants</option>
-            {consultants.map((consultant) => (
-              <option key={consultant.id} value={consultant.id}>
-                {consultant.name}
-              </option>
-            ))}
-          </select>
-          <Input
-            type="date"
-            value={filters.startDate}
-            onChange={(e) =>
-              setFilters({ ...filters, startDate: e.target.value })
-            }
-            placeholder="Start Date"
-          />
-          <Input
-            type="date"
-            value={filters.endDate}
-            onChange={(e) =>
-              setFilters({ ...filters, endDate: e.target.value })
-            }
-            placeholder="End Date"
-          />
-        </div>
-      </Card>
-
-      {/* Performance Visualizations */}
-      <Card className="p-4">
-        <h3 className="text-lg font-semibold mb-4">
-          Performance Visualizations
-        </h3>
-        {performanceData.length > 0 ? (
-          <div className="space-y-6">
-            <div className="h-64">
-              <BarChart data={getBarChartData()} />
-            </div>
-            <div className="h-64">
-              <LineChart data={getLineChartData()} />
-            </div>
+      {/* Consultants Table */}
+      <Card title="Consultant Performance Metrics" className="mt-6">
+        {consultants.length ? (
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Consultant
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Email
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Total Leads
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Converted Leads
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Conversion Rate
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Pending Tasks
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Actions
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {consultants.map((consultant) => (
+                  <tr key={consultant.id}>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm font-medium text-gray-900">
+                        {consultant.name || "N/A"}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm text-gray-500">
+                        {consultant.email || "N/A"}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm text-gray-900">
+                        {consultant.totalLeads || 0}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm text-gray-900">
+                        {consultant.convertedLeads || 0}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm text-gray-900">
+                        {(
+                          ((consultant.totalLeads > 0
+                            ? consultant.convertedLeads / consultant.totalLeads
+                            : 0) || 0) * 100
+                        ).toFixed(2)}
+                        %
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <Badge
+                        className={
+                          (consultant.pendingTasks || 0) > 5
+                            ? "bg-red-100 text-red-800"
+                            : (consultant.pendingTasks || 0) > 0
+                            ? "bg-yellow-100 text-yellow-800"
+                            : "bg-green-100 text-green-800"
+                        }
+                      >
+                        {consultant.pendingTasks || 0}
+                      </Badge>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium flex space-x-2">
+                      <button
+                        onClick={() => openEditModal(consultant)}
+                        className="text-blue-600 hover:text-blue-800"
+                        title="Edit Consultant"
+                      >
+                        <Edit2 className="h-4 w-4" />
+                      </button>
+                      <button
+                        onClick={() => openDeleteModal(consultant)}
+                        className="text-red-600 hover:text-red-800"
+                        title="Disconnect Consultant"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                      <button
+                        onClick={() => openLeadsModal(consultant)}
+                        className={`text-gray-600 hover:text-gray-800 ${
+                          consultant.leads.length === 0
+                            ? "opacity-50 cursor-not-allowed"
+                            : ""
+                        }`}
+                        title="View Leads"
+                        disabled={consultant.leads.length === 0}
+                      >
+                        <Eye className="h-4 w-4" />
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         ) : (
-          <div className="text-center py-8">
-            <BarChart2 className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-            <p className="text-gray-600">
-              No performance data available for the selected filters.
-            </p>
-          </div>
+          <p className="text-gray-500 text-sm p-4">No consultants available</p>
         )}
       </Card>
 
-      {/* Performance Table */}
-      <Card className="p-4">
-        <h3 className="text-lg font-semibold mb-4">Consultant Performance</h3>
-        {performanceData.length === 0 ? (
-          <div className="text-center py-8">
-            <Users className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">
-              No performance data found
-            </h3>
-            <p className="text-gray-600">
-              Adjust your filters to view available performance data.
-            </p>
-          </div>
-        ) : (
-          <DataTable
-            data={performanceData}
-            columns={columns}
-            pagination={true}
-            pageSize={10}
-          />
-        )}
-      </Card>
+      {/* Add/Edit Modal */}
+      <AddOrEditConsultantModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        consultant={selectedConsultant}
+        onSubmit={handleModalSubmit}
+      />
+
+      {/* Delete Confirmation Modal */}
+      <ConfirmDeleteConsultantModal
+        isOpen={isDeleteModalOpen}
+        onClose={() => setIsDeleteModalOpen(false)}
+        onConfirm={handleDelete}
+        consultantName={consultantToDelete?.name}
+      />
+
+      {/* Leads Modal */}
+      <ConsultantLeadsModal
+        isOpen={isLeadsModalOpen}
+        onClose={() => setIsLeadsModalOpen(false)}
+        consultant={selectedConsultantForLeads}
+      />
     </div>
   );
 };
 
 export default ConsultantPerformance;
+
+// import React, { useEffect, useState } from "react";
+// import { useNavigate } from "react-router-dom";
+// import useManagerStore from "../../stores/useManagerStore";
+// import managerService from "../../services/managerService";
+// import AddOrEditConsultantModal from "../../components/manager/AddOrEditConsultantModal";
+// import Card from "../../components/ui/Card";
+// import Button from "../../components/ui/Button";
+// import Badge from "../../components/ui/Badge";
+// import LoadingSpinner from "../../components/ui/LoadingSpinner";
+// import { Users, User, Edit2, Trash2 } from "lucide-react";
+// import { toast } from "react-toastify";
+// import "react-toastify/dist/ReactToastify.css";
+
+// const ConsultantPerformance = () => {
+//   const navigate = useNavigate();
+//   const { consultants, fetchOfficeConsultants, loading, error } =
+//     useManagerStore();
+//   const [reports, setReports] = useState([]);
+//   const [isLoadingReports, setIsLoadingReports] = useState(false);
+//   const [isModalOpen, setIsModalOpen] = useState(false);
+//   const [selectedConsultant, setSelectedConsultant] = useState(null);
+
+//   // Fetch consultants and reports
+//   useEffect(() => {
+//     console.log("Fetching consultants and reports...");
+//     fetchOfficeConsultants();
+//     // const fetchReports = async () => {
+//     //   setIsLoadingReports(true);
+//     //   try {
+//     //     const res = await managerService.getStaffReports();
+//     //     console.log('Fetched reports:', res.data);
+//     //     setReports(res.data || []);
+//     //   } catch (err) {
+//     //     console.error('Fetch reports error:', err);
+//     //     toast.error(
+//     //       err.response?.data?.error || 'Failed to fetch performance reports'
+//     //     );
+//     //   } finally {
+//     //     setIsLoadingReports(false);
+//     //   }
+//     // };
+//     // fetchReports();
+//   }, [fetchOfficeConsultants]);
+
+//   // Handle errors
+//   useEffect(() => {
+//     if (error) {
+//       console.error("Consultant error:", error);
+//       toast.error(error);
+//     }
+//   }, [error]);
+
+//   // Handle modal submit (create or update)
+//   const handleModalSubmit = async (formData) => {
+//     try {
+//       await managerService.createStaffMember(formData); // Handles both create and update
+//       await fetchOfficeConsultants(); // Refresh consultants list
+//     } catch (err) {
+//       throw err; // Let modal handle error
+//     }
+//   };
+
+//   // Handle delete consultant
+//   const handleDelete = async (consultantId) => {
+//     if (!window.confirm("Are you sure you want to disconnect this consultant?"))
+//       return;
+//     try {
+//       await managerService.disconnectStaffMember(consultantId);
+//       toast.success("Consultant disconnected successfully");
+//       await fetchOfficeConsultants(); // Refresh consultants list
+//     } catch (err) {
+//       toast.error(
+//         err.response?.data?.message || "Failed to disconnect consultant"
+//       );
+//     }
+//   };
+
+//   // Open modal for adding
+//   const openAddModal = () => {
+//     setSelectedConsultant(null);
+//     setIsModalOpen(true);
+//   };
+
+//   // Open modal for editing
+//   const openEditModal = (consultant) => {
+//     setSelectedConsultant(consultant);
+//     setIsModalOpen(true);
+//   };
+
+//   if (loading || isLoadingReports) {
+//     return (
+//       <div className="flex items-center justify-center h-64">
+//         <LoadingSpinner size="lg" />
+//       </div>
+//     );
+//   }
+
+//   return (
+//     <div className="p-6 bg-gradient-to-br from-gray-50 to-gray-100 min-h-screen">
+//       {/* Header */}
+//       <div className="flex justify-between items-center">
+//         <div>
+//           <h1 className="text-2xl font-bold text-gray-900">Consultant</h1>
+//           <p className="text-gray-600">Overview of consultant performance</p>
+//         </div>
+//         <div className="flex space-x-3">
+//           <Button
+//             variant="outline"
+//             onClick={() => navigate("/manager/schedules")}
+//           >
+//             <Users className="h-4 w-4 mr-2" />
+//             View Schedules
+//           </Button>
+//           <Button variant="primary" onClick={openAddModal}>
+//             <User className="h-4 w-4 mr-2" />
+//             Add Consultant
+//           </Button>
+//         </div>
+//       </div>
+
+//       {/* Consultants Table */}
+//       <Card title="Consultant Performance Metrics" className="mt-6">
+//         {consultants.length ? (
+//           <div className="overflow-x-auto">
+//             <table className="min-w-full divide-y divide-gray-200">
+//               <thead className="bg-gray-50">
+//                 <tr>
+//                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+//                     Consultant
+//                   </th>
+//                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+//                     Email
+//                   </th>
+//                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+//                     Total Leads
+//                   </th>
+//                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+//                     Converted Leads
+//                   </th>
+//                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+//                     Conversion Rate
+//                   </th>
+//                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+//                     Pending Tasks
+//                   </th>
+//                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+//                     Actions
+//                   </th>
+//                 </tr>
+//               </thead>
+//               <tbody className="bg-white divide-y divide-gray-200">
+//                 {consultants.map((consultant) => (
+//                   <tr key={consultant.id}>
+//                     <td className="px-6 py-4 whitespace-nowrap">
+//                       <div className="text-sm font-medium text-gray-900">
+//                         {consultant.name || "N/A"}
+//                       </div>
+//                     </td>
+//                     <td className="px-6 py-4 whitespace-nowrap">
+//                       <div className="text-sm text-gray-500">
+//                         {consultant.email || "N/A"}
+//                       </div>
+//                     </td>
+//                     <td className="px-6 py-4 whitespace-nowrap">
+//                       <div className="text-sm text-gray-900">
+//                         {consultant.totalLeads || 0}
+//                       </div>
+//                     </td>
+//                     <td className="px-6 py-4 whitespace-nowrap">
+//                       <div className="text-sm text-gray-900">
+//                         {consultant.convertedLeads || 0}
+//                       </div>
+//                     </td>
+//                     <td className="px-6 py-4 whitespace-nowrap">
+//                       <div className="text-sm text-gray-900">
+//                         {(
+//                           ((consultant.totalLeads > 0
+//                             ? consultant.convertedLeads / consultant.totalLeads
+//                             : 0) || 0) * 100
+//                         ).toFixed(2)}
+//                         %
+//                       </div>
+//                     </td>
+//                     <td className="px-6 py-4 whitespace-nowrap">
+//                       <Badge
+//                         className={
+//                           (consultant.pendingTasks || 0) > 5
+//                             ? "bg-red-100 text-red-800"
+//                             : (consultant.pendingTasks || 0) > 0
+//                             ? "bg-yellow-100 text-yellow-800"
+//                             : "bg-green-100 text-green-800"
+//                         }
+//                       >
+//                         {consultant.pendingTasks || 0}
+//                       </Badge>
+//                     </td>
+//                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium flex space-x-2">
+//                       <button
+//                         onClick={() => openEditModal(consultant)}
+//                         className="text-blue-600 hover:text-blue-800"
+//                         title="Edit Consultant"
+//                       >
+//                         <Edit2 className="h-4 w-4" />
+//                       </button>
+//                       <button
+//                         onClick={() => handleDelete(consultant.id)}
+//                         className="text-red-600 hover:text-red-800"
+//                         title="Disconnect Consultant"
+//                       >
+//                         <Trash2 className="h-4 w-4" />
+//                       </button>
+//                     </td>
+//                   </tr>
+//                 ))}
+//               </tbody>
+//             </table>
+//           </div>
+//         ) : (
+//           <p className="text-gray-500 text-sm p-4">No consultants available</p>
+//         )}
+//       </Card>
+
+//       {/* Modal */}
+//       <AddOrEditConsultantModal
+//         isOpen={isModalOpen}
+//         onClose={() => setIsModalOpen(false)}
+//         consultant={selectedConsultant}
+//         onSubmit={handleModalSubmit}
+//       />
+//     </div>
+//   );
+// };
+
+// export default ConsultantPerformance;

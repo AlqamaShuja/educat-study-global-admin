@@ -1,4 +1,4 @@
-import React, { Suspense, useEffect } from "react";
+import React, { Suspense, useEffect, useLayoutEffect } from "react";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import { NotificationProvider } from "./contexts/NotificationContext";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
@@ -10,13 +10,11 @@ import Layout from "./components/layout/Layout";
 
 // Component to handle role-based protection
 const PrivateRoute = ({ component: Component, roles, isPublic }) => {
-  const { user, isLoading, initializeAuth, } = useAuthStore();
+  const { user, loading } = useAuthStore();
 
-  useEffect(() => {
-    initializeAuth?.();
-  }, [initializeAuth]);
+  // console.log(user, "sakcnancasncssac", loading);
 
-  if (isLoading) {
+  if (loading) {
     return (
       <div className="flex justify-center items-center h-screen">
         <LoadingSpinner size="lg" />
@@ -28,7 +26,7 @@ const PrivateRoute = ({ component: Component, roles, isPublic }) => {
     return <Component />;
   }
 
-  if (!user && !isLoading) {
+  if (!user && !loading) {
     return <Navigate to="/login" replace />;
   }
 
@@ -61,14 +59,16 @@ const DefaultRoute = () => {
 };
 
 function App() {
-  const { user, initializeAuth, isLoading } = useAuthStore();
+  const { user, initializeAuth, loading } = useAuthStore();
 
-  // Initialize authentication on app start
   useEffect(() => {
-    initializeAuth?.();
-  }, [initializeAuth]);
+    initializeAuth(); // Store handles everything
+  }, []);
 
-  if (isLoading) {
+  console.log(user, loading, 'asncjasncascjacnsnas');
+  
+
+  if (loading) {
     return (
       <div className="flex justify-center items-center h-screen bg-background">
         <div className="text-center">
