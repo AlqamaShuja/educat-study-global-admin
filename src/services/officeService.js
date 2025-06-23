@@ -9,6 +9,13 @@ const officeService = {
     
     return res;
   },
+  
+  getOfficeDetailsById: async (id) => {
+    const res = await api.get(`/super-admin/office/${id}`);
+    console.log(res, "asknacnascjasncasn");
+    
+    return res;
+  },
 
   createOffice: async (data) => {
     const res = await api.post("/super-admin/offices", data);

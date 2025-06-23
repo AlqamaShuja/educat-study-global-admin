@@ -9,12 +9,14 @@ import {
   Globe,
   MapPin,
   Building,
+  Eye,
 } from "lucide-react";
 import Button from "../../components/ui/Button";
 import Input from "../../components/ui/Input";
 import Modal from "../../components/ui/Modal";
 import UniversityForm from "../../components/forms/UniversityForm";
 import useUniversityStore from "../../stores/universityStore";
+import { useNavigate } from "react-router-dom";
 
 const UniversityManagement = () => {
   //   const [universities, setUniversities] = useState([]);
@@ -22,6 +24,7 @@ const UniversityManagement = () => {
   const [formLoading, setFormLoading] = useState(false);
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
   const [editingUniversity, setEditingUniversity] = useState(null);
+  const navigate = useNavigate();
 
   // Search and filter states
   const [searchTerm, setSearchTerm] = useState("");
@@ -313,6 +316,20 @@ const UniversityManagement = () => {
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() =>
+                          navigate(
+                            `/super-admin/university/${university?.id}`,
+                            { state: university }
+                          )
+                        }
+                        className="flex items-center gap-1"
+                      >
+                        <Eye className="h-3 w-3" />
+                        View
+                      </Button>
                       <Button
                         variant="outline"
                         size="sm"

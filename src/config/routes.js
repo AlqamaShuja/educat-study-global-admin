@@ -63,6 +63,8 @@ const UnauthorizedPage = lazy(() => import('../pages/common/UnauthorizedPage'));
 const ProfilePage = lazy(() => import('../pages/common/ProfilePage'));
 const SettingsPage = lazy(() => import('../pages/common/SettingsPage'));
 const NotificationsPage = lazy(() => import('../pages/common/NotificationsPage'));
+const OfficeDetailsPage = lazy(() => import('../pages/common/OfficeDetails'));
+const UniversityDetailsPage = lazy(() => import('../pages/common/UniversityDetails'));
 
 export const routes = [
   // Public Routes
@@ -86,6 +88,12 @@ export const routes = [
     component: ResetPasswordPage,
     isPublic: true,
   },
+  // office for all
+  // {
+  //   path: '/office',
+  //   component: OfficeDetailsPage,
+  //   isPublic: true,
+  // },
 
   // Super Admin Routes
   {
@@ -156,6 +164,16 @@ export const routes = [
   {
     path: '/super-admin/lead',
     component: LeadManagement,
+    roles: ['super_admin'],
+  },
+  {
+    path: '/super-admin/office/:officeId',
+    component: OfficeDetailsPage,
+    roles: ['super_admin'],
+  },
+  {
+    path: '/super-admin/university/:universityId',
+    component: UniversityDetailsPage,
     roles: ['super_admin'],
   },
 

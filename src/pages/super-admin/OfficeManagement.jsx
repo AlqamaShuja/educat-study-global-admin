@@ -8,9 +8,10 @@ import LoadingSpinner from "../../components/ui/LoadingSpinner";
 import ConfirmDialog from "../../components/ui/ConfirmDialog";
 import DataTable from "../../components/tables/DataTable";
 import TableFilters from "../../components/tables/TableFilters";
-import { Plus, Edit, Trash2, MapPin, Users, Phone, Mail } from "lucide-react";
+import { Plus, Edit, Trash2, MapPin, Users, Phone, Mail, Eye } from "lucide-react";
 import useUIStore from "../../stores/uiStore";
 import OfficeFormModal from "../../components/forms/OfficeFormModal";
+import { useNavigate } from "react-router-dom";
 
 const OfficeManagement = () => {
   const {
@@ -26,6 +27,7 @@ const OfficeManagement = () => {
 
   const { users, fetchAllStaff } = useUserStore();
   const { theme } = useUIStore();
+  const navigate = useNavigate();
 
   const [searchTerm, setSearchTerm] = useState("");
   const [filters, setFilters] = useState({
@@ -383,6 +385,14 @@ const OfficeManagement = () => {
       header: "Actions",
       render: (_, office) => (
         <div className="flex items-center gap-2">
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => navigate(`/super-admin/office/${office?.id}`, { state: office })}
+            className="text-blue-600 hover:bg-blue-50 border-blue-300"
+          >
+            <Eye className="w-4 h-4" />
+          </Button>
           <Button
             size="sm"
             variant="outline"
