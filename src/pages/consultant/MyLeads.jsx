@@ -5,7 +5,7 @@ import Badge from "../../components/ui/Badge";
 import Input from "../../components/ui/Input";
 import LoadingSpinner from "../../components/ui/LoadingSpinner";
 import { Eye, Calendar, FileText } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import LeadStatusTaskAndDocumentModal from "../../components/consultant/LeadStatusTakAndDocumentModal";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -37,6 +37,7 @@ const MyLeads = () => {
   });
   const [hasLoaded, setHasLoaded] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
+  const navigate = useNavigate();
   const pageSize = 10;
 
   useEffect(() => {
@@ -56,7 +57,7 @@ const MyLeads = () => {
     console.log("Leads state:", leads);
     console.log("Has loaded:", hasLoaded);
     console.log("Loading:", loading);
-    if (leads.length && hasLoaded) {
+    if (leads?.length && hasLoaded) {
       console.log("First lead:", leads[0]);
     }
   }, [leads, hasLoaded, loading]);
@@ -78,8 +79,8 @@ const MyLeads = () => {
 
   const handleSelectLead = (lead) => {
     console.log("Selecting lead:", lead);
-    const enrichedHistory = lead.history
-      ? lead.history.map((entry) => ({
+    const enrichedHistory = lead?.history
+      ? lead?.history?.map((entry) => ({
           ...entry,
           userRole:
             entry.userId === lead.studentId
@@ -113,7 +114,7 @@ const MyLeads = () => {
   };
 
   const filteredLeads = Array.isArray(leads)
-    ? leads.filter((lead) => {
+    ? leads?.filter((lead) => {
         const matchesStatus = !filters.status || lead.status === filters.status;
         const matchesSearch =
           !filters.search ||
@@ -137,7 +138,7 @@ const MyLeads = () => {
   console.log("Filtered leads:", filteredLeads);
 
   // Pagination logic
-  const totalPages = Math.ceil(filteredLeads.length / pageSize);
+  const totalPages = Math.ceil(filteredLeads?.length / pageSize);
   const paginatedLeads = filteredLeads.slice(
     (currentPage - 1) * pageSize,
     currentPage * pageSize
@@ -147,6 +148,12 @@ const MyLeads = () => {
     if (page >= 1 && page <= totalPages) {
       setCurrentPage(page);
     }
+  };
+
+  const handleViewProfile = (lead) => {
+    navigate(`/consultant/students/${lead.studentId}`, {
+      state: { lead },
+    });
   };
 
   return (
@@ -181,17 +188,17 @@ const MyLeads = () => {
             <option value="lost">Lost</option>
           </select>
           <div className="text-sm text-gray-600 flex items-center">
-            Total: {filteredLeads.length} leads
+            Total: {filteredLeads?.length} leads
           </div>
         </div>
       </div>
 
       {/* Leads Table */}
-      {!hasLoaded || (loading && !leads.length) ? (
+      {!hasLoaded || (loading && !leads?.length) ? (
         <div className="flex items-center justify-center h-64">
           <LoadingSpinner size="lg" />
         </div>
-      ) : filteredLeads.length ? (
+      ) : filteredLeads?.length ? (
         <div className="bg-white rounded-lg shadow overflow-x-auto">
           <table className="min-w-full bg-white border border-gray-200">
             <thead className="bg-gray-50">
@@ -220,7 +227,7 @@ const MyLeads = () => {
               </tr>
             </thead>
             <tbody>
-              {paginatedLeads.map((lead, index) => (
+              {paginatedLeads?.map((lead, index) => (
                 <tr
                   key={lead.id}
                   className={index % 2 === 0 ? "bg-white" : "bg-gray-50"}
@@ -268,17 +275,19 @@ const MyLeads = () => {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                     <div className="flex space-x-2">
-                      <Link
+                      {/* <Link
                         to={`/consultant/students/${lead.studentId}`}
+                        state={lead}
+                      > */}
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        title="View Profile"
+                        onClick={() => handleViewProfile(lead)}
                       >
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          title="View Profile"
-                        >
-                          <Eye className="h-4 w-4" />
-                        </Button>
-                      </Link>
+                        <Eye className="h-4 w-4" />
+                      </Button>
+                      {/* </Link> */}
                       <Button
                         size="sm"
                         variant="outline"
