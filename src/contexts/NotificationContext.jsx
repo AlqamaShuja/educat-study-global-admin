@@ -37,9 +37,9 @@ export const NotificationProvider = ({ children, userId }) => {
   // Initial fetch and polling
   useEffect(() => {
     fetchNotifications();
-    const intervalId = setInterval(fetchNotifications, 30000); // Poll every 30 seconds
+    const intervalId = setInterval(fetchNotifications, 120000); // Poll every 120 seconds
     return () => clearInterval(intervalId);
-  }, [fetchNotifications]);
+  }, []);
 
   // Calculate unread notifications count
   const unreadCount = notifications.filter((n) => !n.read).length;

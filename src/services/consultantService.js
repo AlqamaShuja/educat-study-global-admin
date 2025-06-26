@@ -32,6 +32,22 @@ const consultantService = {
     return res;
   },
 
+  // get all lead task
+  async getAllLeadTasks() {
+    const res = await api.get(`/consultant/tasks`);
+    return res;
+  },
+
+  async deleteLeadTaskById(id) {
+    const res = await api.delete(`/consultant/tasks/${id}`);
+    return res;
+  },
+
+  async editLeadTask(taskId, taskData) {
+    const res = await api.put(`/consultant/tasks/${taskId}`, taskData);
+    return res;
+  },
+
   // Get lead documents
   async getLeadDocuments(leadId) {
     const res = await api.get(`/consultant/leads/${leadId}/documents`);
@@ -46,16 +62,20 @@ const consultantService = {
 
   // Upload documents for lead (accepts FormData)
   async uploadLeadDocument(leadId, formData) {
-    const res = await api.post(
-      `/consultant/leads/${leadId}/documents`,
-      formData,
-      {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      }
-    );
-    return res;
+    try {
+      const res = await api.post(
+        `/consultant/leads/${leadId}/documents`,
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+      return res;
+    } catch (error) {
+      return error;
+    }
   },
 
   // Request profile info
@@ -159,6 +179,35 @@ const consultantService = {
   // Get application progress
   async getApplicationProgress(studentId) {
     const res = await api.get(`/consultant/students/${studentId}/progress`);
+    return res;
+  },
+
+  // Get appointments
+  async getAppointments() {
+    const res = await api.get("/consultant/appointments");
+    return res;
+  },
+
+  // Update appointment
+  async updateAppointment(appointmentId, appointmentData) {
+    const res = await api.put(
+      `/consultant/appointments/${appointmentId}`,
+      appointmentData
+    );
+    return res;
+  },
+
+  // Delete appointment
+  async deleteAppointment(appointmentId) {
+    const res = await api.delete(`/consultant/appointments/${appointmentId}`);
+    return res;
+  },
+
+  async updateDocumentStatus(documentId, status, notes) {
+    const res = await api.put(`/consultant/documents/${documentId}/status`, {
+      status,
+      notes,
+    });
     return res;
   },
 };

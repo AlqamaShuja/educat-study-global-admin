@@ -36,6 +36,9 @@ import {
   Send,
   CheckCircle,
   Circle,
+  Eye,
+  Download,
+  Image,
 } from "lucide-react";
 
 // Custom notification helper
@@ -55,7 +58,7 @@ const StudentProfiles = () => {
   const locationState = useLocation();
 
   console.log(locationState, "ascnajcnas:locationState");
-  
+
   // Get lead data from navigation state
   const leadFromState = locationState?.state?.lead;
 
@@ -74,6 +77,8 @@ const StudentProfiles = () => {
     clearError,
   } = useConsultantStore();
 
+  console.log(documents, "sacnacnajcnasjcn");
+
   // Modal states
   const [showDocumentModal, setShowDocumentModal] = useState(false);
   const [showMessageModal, setShowMessageModal] = useState(false);
@@ -85,6 +90,9 @@ const StudentProfiles = () => {
   const [documentFiles, setDocumentFiles] = useState([]);
   const [documentTypes, setDocumentTypes] = useState([]);
   const [documentNotes, setDocumentNotes] = useState([]);
+
+  const [showImageModal, setShowImageModal] = useState(false);
+  const [selectedImage, setSelectedImage] = useState(null);
 
   // Loading states
   const [hasLoaded, setHasLoaded] = useState(false);
@@ -316,6 +324,54 @@ const StudentProfiles = () => {
     setDocumentFiles(documentFiles.filter((_, i) => i !== index));
     setDocumentTypes(documentTypes.filter((_, i) => i !== index));
     setDocumentNotes(documentNotes.filter((_, i) => i !== index));
+  };
+
+  // File handling logic
+  const getFileExtension = (filePath) => {
+    return filePath.split(".").pop().toLowerCase();
+  };
+
+  const isImageFile = (doc) => {
+    const imageTypes = ["photo", "image"];
+    const imageExtensions = ["jpg", "jpeg", "png", "gif", "bmp", "webp"];
+    return (
+      imageTypes.includes(doc.type.toLowerCase()) ||
+      imageExtensions.includes(getFileExtension(doc.filePath))
+    );
+  };
+
+  const isPdfFile = (doc) => {
+    return (
+      doc.type.toLowerCase().includes("pdf") ||
+      getFileExtension(doc.filePath) === "pdf"
+    );
+  };
+
+  const handleViewDocument = (doc) => {
+    const fileUrl = `${
+      import.meta.env.VITE_API_BASE_URL || "http://localhost:5009"
+    }/api/v1/file/documents/${doc.id}`;
+
+    if (isImageFile(doc)) {
+      setSelectedImage({ ...doc, url: fileUrl });
+      setShowImageModal(true);
+    } else if (isPdfFile(doc)) {
+      window.open(fileUrl, "_blank");
+    } else {
+      // Download other files
+      const link = document.createElement("a");
+      link.href = fileUrl;
+      link.download = `${doc.type}_${doc.id}.${getFileExtension(doc.filePath)}`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+  };
+
+  const getFileIcon = (doc) => {
+    if (isImageFile(doc)) return <Image className="h-4 w-4" />;
+    if (isPdfFile(doc)) return <FileText className="h-4 w-4" />;
+    return <Download className="h-4 w-4" />;
   };
 
   // Loading state
@@ -722,37 +778,135 @@ const StudentProfiles = () => {
           <Card title="Documents">
             {documents && documents.length ? (
               <div className="space-y-2">
-                {documents.slice(0, 5).map((doc) => (
+                {documents?.map((doc) => (
                   <div
                     key={doc.id}
-                    className="flex items-center justify-between"
+                    className="flex items-center justify-between p-2 hover:bg-gray-50 rounded-lg group"
                   >
-                    <span className="text-sm text-gray-900 capitalize">
-                      {doc.type.replace("_", " ")}
-                    </span>
-                    <Badge
-                      className={
-                        doc.status === "approved"
-                          ? "bg-green-100 text-green-800"
-                          : doc.status === "rejected"
-                          ? "bg-red-100 text-red-800"
-                          : "bg-yellow-100 text-yellow-800"
-                      }
-                    >
-                      {doc.status}
-                    </Badge>
+                    <div className="flex items-center space-x-2 flex-1">
+                      {getFileIcon(doc)}
+                      <div className="flex-1 min-w-0">
+                        <span className="text-sm text-gray-900 capitalize block truncate">
+                          {doc.type.replace("_", " ")}
+                        </span>
+                        {doc.notes && (
+                          <span className="text-xs text-gray-500 block truncate">
+                            {doc.notes}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="flex items-center space-x-2">
+                      <Badge
+                        className={
+                          doc.status === "approved"
+                            ? "bg-green-100 text-green-800"
+                            : doc.status === "rejected"
+                            ? "bg-red-100 text-red-800"
+                            : "bg-yellow-100 text-yellow-800"
+                        }
+                      >
+                        {doc.status}
+                      </Badge>
+
+                      <button
+                        onClick={() => handleViewDocument(doc)}
+                        className="opacity-0 group-hover:opacity-100 transition-opacity p-1 text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded"
+                        title={
+                          isImageFile(doc)
+                            ? "View Image"
+                            : isPdfFile(doc)
+                            ? "Open PDF"
+                            : "Download File"
+                        }
+                      >
+                        <Eye className="h-4 w-4" />
+                      </button>
+                    </div>
                   </div>
                 ))}
-                {documents.length > 5 && (
-                  <p className="text-xs text-gray-500">
-                    +{documents.length - 5} more documents
-                  </p>
-                )}
               </div>
             ) : (
               <p className="text-gray-500 text-sm">No documents uploaded</p>
             )}
           </Card>
+
+          {/* Add this Image Modal at the end of your component, before the closing div */}
+          <Modal
+            isOpen={showImageModal}
+            onClose={() => {
+              setShowImageModal(false);
+              setSelectedImage(null);
+            }}
+            title={`${selectedImage?.type?.replace("_", " ") || "Document"}`}
+            size="lg"
+          >
+            {selectedImage && (
+              <div className="space-y-4">
+                <div className="flex justify-center">
+                  <img
+                    src={selectedImage.url}
+                    alt={selectedImage.type}
+                    className="max-w-full max-h-96 object-contain rounded-lg shadow-lg"
+                    onError={(e) => {
+                      e.target.style.display = "none";
+                      e.target.nextSibling.style.display = "block";
+                    }}
+                  />
+                  <div className="hidden text-center text-gray-500">
+                    <FileText className="h-12 w-12 mx-auto mb-2 text-gray-400" />
+                    <p>Unable to load image</p>
+                  </div>
+                </div>
+
+                {selectedImage.notes && (
+                  <div className="bg-gray-50 p-3 rounded-lg">
+                    <p className="text-sm text-gray-700">
+                      <strong>Notes:</strong> {selectedImage.notes}
+                    </p>
+                  </div>
+                )}
+
+                <div className="flex justify-between items-center text-sm text-gray-500">
+                  <span>
+                    Uploaded:{" "}
+                    {new Date(selectedImage.createdAt).toLocaleDateString()}
+                  </span>
+                  <span className="capitalize">
+                    Status: {selectedImage.status}
+                  </span>
+                </div>
+
+                <div className="flex justify-end space-x-3">
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      const link = document.createElement("a");
+                      link.href = selectedImage.url;
+                      link.download = `${selectedImage.type}_${
+                        selectedImage.id
+                      }.${getFileExtension(selectedImage.filePath)}`;
+                      document.body.appendChild(link);
+                      link.click();
+                      document.body.removeChild(link);
+                    }}
+                  >
+                    <Download className="h-4 w-4 mr-2" />
+                    Download
+                  </Button>
+                  <Button
+                    onClick={() => {
+                      setShowImageModal(false);
+                      setSelectedImage(null);
+                    }}
+                  >
+                    Close
+                  </Button>
+                </div>
+              </div>
+            )}
+          </Modal>
         </div>
       </div>
 

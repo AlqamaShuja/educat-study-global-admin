@@ -1,6 +1,7 @@
 // stores/consultantStore.js
 import { create } from "zustand";
 import consultantService from "../services/consultantService";
+import { toast } from "react-toastify";
 
 const useConsultantStore = create((set, get) => ({
   // State
@@ -11,6 +12,7 @@ const useConsultantStore = create((set, get) => ({
   loading: false,
   error: null,
   studentProfile: null,
+  appointments: [],
 
   // Helper methods
   setLoading: (loading) => set({ loading }),
@@ -126,6 +128,68 @@ const useConsultantStore = create((set, get) => ({
     }
   },
 
+  fetchAllLeadTasks: async () => {
+    set({ loading: true, error: null });
+    try {
+      const res = await consultantService.getAllLeadTasks();
+      set({ tasks: res, loading: false });
+      return res;
+    } catch (error) {
+      const errorMessage =
+        error.response?.data?.error || error.message || "Failed to fetch tasks";
+      set({ error: errorMessage, loading: false });
+      throw error;
+    }
+  },
+
+  deleteLeadTaskById: async (id) => {
+    set({ error: null });
+    try {
+      set((prev) => ({
+        ...prev,
+        tasks: prev.tasks?.filter((task) => task.id !== id),
+        loading: false,
+      }));
+      const res = await consultantService.deleteLeadTaskById(id);
+      return res;
+    } catch (error) {
+      const errorMessage =
+        error.response?.data?.message ||
+        error.message ||
+        "Failed to delete task";
+      set({ error: errorMessage, loading: false });
+      throw new AppError(errorMessage, error.response?.status || 500);
+    }
+  },
+
+  editLeadTask: async (taskId, taskData) => {
+    set({ loading: true, error: null });
+    try {
+      const res = await consultantService.editLeadTask(taskId, {
+        description: taskData.description,
+        dueDate: new Date(taskData.dueDate).toISOString(),
+        status: taskData.status,
+        leadId: taskData.leadId,
+        notes: taskData.notes,
+      });
+      set((prev) => ({
+        ...prev,
+        tasks: prev.tasks.map((task) =>
+          task.id === taskId ? { ...task, ...res.data } : task
+        ),
+        loading: false,
+      }));
+      return res;
+    } catch (error) {
+      const errorMessage =
+        error.response?.data?.message ||
+        error.message ||
+        "Failed to update task";
+      set({ error: errorMessage, loading: false });
+      throw new AppError(errorMessage, error.response?.status || 500);
+    }
+  },
+
   // Fetch lead documents
   fetchLeadDocuments: async (leadId) => {
     set({ loading: true, error: null });
@@ -184,10 +248,14 @@ const useConsultantStore = create((set, get) => ({
       await get().fetchLeadDocuments(leadId);
       return res;
     } catch (error) {
+      console.log(error, "asncajsncajsncsn");
+
       const errorMessage =
+        error.error ||
         error.response?.data?.error ||
         error.message ||
         "Failed to upload document";
+      // toast.error(errorMessage)
       set({ error: errorMessage });
       throw error;
     }
@@ -206,6 +274,30 @@ const useConsultantStore = create((set, get) => ({
         error.response?.data?.error ||
         error.message ||
         "Failed to upload lead document";
+      set({ error: errorMessage });
+      throw error;
+    }
+  },
+
+  // Update document status
+  updateDocumentStatus: async (documentId, status, notes) => {
+    try {
+      const res = await consultantService.updateDocumentStatus(
+        documentId,
+        status,
+        notes
+      );
+      set((state) => ({
+        documents: state.documents.map((doc) =>
+          doc.id === documentId ? { ...doc, status, notes } : doc
+        ),
+      }));
+      return res;
+    } catch (error) {
+      const errorMessage =
+        error.response?.data?.error ||
+        error.message ||
+        "Failed to update document status";
       set({ error: errorMessage });
       throw error;
     }
@@ -466,7 +558,66 @@ const useConsultantStore = create((set, get) => ({
       loading: false,
       error: null,
       studentProfile: null,
+      appointments: [],
     }),
+
+  fetchAppointments: async () => {
+    set({ loading: true, error: null });
+    try {
+      const res = await consultantService.getAppointments();
+      set({ appointments: res, loading: false });
+      return res;
+    } catch (error) {
+      const errorMessage =
+        error.response?.data?.error ||
+        error.message ||
+        "Failed to fetch appointments";
+      set({ error: errorMessage, loading: false });
+      throw error;
+    }
+  },
+
+  // Update appointment
+  updateAppointment: async (appointmentId, appointmentData) => {
+    try {
+      const res = await consultantService.updateAppointment(
+        appointmentId,
+        appointmentData
+      );
+      set((state) => ({
+        appointments: state.appointments.map((apt) =>
+          apt.id === appointmentId ? res : apt
+        ),
+      }));
+      return res;
+    } catch (error) {
+      const errorMessage =
+        error.response?.data?.error ||
+        error.message ||
+        "Failed to update appointment";
+      set({ error: errorMessage });
+      throw error;
+    }
+  },
+
+  // Delete appointment
+  deleteAppointment: async (appointmentId) => {
+    try {
+      await consultantService.deleteAppointment(appointmentId);
+      set((state) => ({
+        appointments: state.appointments.filter(
+          (apt) => apt.id !== appointmentId
+        ),
+      }));
+    } catch (error) {
+      const errorMessage =
+        error.response?.data?.error ||
+        error.message ||
+        "Failed to delete appointment";
+      set({ error: errorMessage });
+      throw error;
+    }
+  },
 }));
 
 export default useConsultantStore;

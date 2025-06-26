@@ -8,10 +8,6 @@ const useNotifications = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-//   const api = axios.create({
-//     baseURL: process.env.REACT_APP_API_URL || "http://localhost:5000/api/v1",
-//     headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-//   });
 
   // Get notifications
   const getNotifications = async () => {
@@ -19,7 +15,7 @@ const useNotifications = () => {
     setError(null);
     try {
       const response = await api.get("/notifications");
-      return response.data;
+      return response;
     } catch (err) {
       setError(err.response?.data?.error || "Failed to fetch notifications");
       throw err;
@@ -33,8 +29,8 @@ const useNotifications = () => {
     setLoading(true);
     setError(null);
     try {
-      const response = await api.put(`/notifications/${notificationId}/read`);
-      return response.data;
+      const response = await api.patch(`/notifications/${notificationId}/read`);
+      return response;
     } catch (err) {
       setError(
         err.response?.data?.error || "Failed to mark notification as read"
@@ -51,7 +47,7 @@ const useNotifications = () => {
     setError(null);
     try {
       const response = await api.put("/notifications/read-all");
-      return response.data;
+      return response;
     } catch (err) {
       setError(
         err.response?.data?.error || "Failed to mark all notifications as read"
@@ -68,7 +64,7 @@ const useNotifications = () => {
     setError(null);
     try {
       const response = await api.delete(`/notifications/${notificationId}`);
-      return response.data;
+      return response;
     } catch (err) {
       setError(err.response?.data?.error || "Failed to delete notification");
       throw err;
@@ -87,7 +83,7 @@ const useNotifications = () => {
           ? "/manager/notifications"
           : "/super-admin/notifications";
       const response = await api.post(endpoint, notificationData);
-      return response.data;
+      return response;
     } catch (err) {
       setError(err.response?.data?.error || "Failed to send notification");
       throw err;
