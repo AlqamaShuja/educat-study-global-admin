@@ -210,6 +210,63 @@ const consultantService = {
     });
     return res;
   },
+
+  // Update lead parked status - NEW FUNCTION
+  async updateLeadParkedStatus(leadId, parked) {
+    const res = await api.put(`/consultant/leads/${leadId}/parked`, { parked });
+    return res;
+  },
+
+  // Proposal-related functions - NEW FUNCTIONS
+
+  // Create proposal for a lead
+  async createProposal(leadId, proposalData) {
+    const res = await api.post(
+      `/consultant/leads/${leadId}/proposals`,
+      proposalData
+    );
+    return res;
+  },
+
+  // Get all proposals created by consultant
+  async getProposals(status = "") {
+    const params = status ? { status } : {};
+    const res = await api.get("/consultant/proposals", { params });
+    return res;
+  },
+
+  // Get proposals for a specific lead
+  async getProposalsByLead(leadId) {
+    const res = await api.get(`/consultant/leads/${leadId}/proposals`);
+    return res;
+  },
+
+  // Get proposal by ID
+  async getProposalById(proposalId) {
+    const res = await api.get(`/consultant/proposals/${proposalId}`);
+    return res;
+  },
+
+  // Update proposal
+  async updateProposal(proposalId, proposalData) {
+    const res = await api.put(
+      `/consultant/proposals/${proposalId}`,
+      proposalData
+    );
+    return res;
+  },
+
+  // Delete proposal
+  async deleteProposal(proposalId) {
+    const res = await api.delete(`/consultant/proposals/${proposalId}`);
+    return res;
+  },
+
+  // Get proposal statistics
+  async getProposalStats() {
+    const res = await api.get("/consultant/proposals/stats");
+    return res;
+  },
 };
 
 export default consultantService;

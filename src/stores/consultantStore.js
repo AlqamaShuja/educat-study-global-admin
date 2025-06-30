@@ -13,6 +13,7 @@ const useConsultantStore = create((set, get) => ({
   error: null,
   studentProfile: null,
   appointments: [],
+  proposals: [],
 
   // Helper methods
   setLoading: (loading) => set({ loading }),
@@ -614,6 +615,128 @@ const useConsultantStore = create((set, get) => ({
         error.response?.data?.error ||
         error.message ||
         "Failed to delete appointment";
+      set({ error: errorMessage });
+      throw error;
+    }
+  },
+
+  // Update lead parked status - NEW FUNCTION
+  updateLeadParkedStatus: async (leadId, parked) => {
+    try {
+      const res = await consultantService.updateLeadParkedStatus(
+        leadId,
+        parked
+      );
+      set((state) => ({
+        leads: state.leads.map((lead) =>
+          lead.id === leadId ? { ...lead, parked } : lead
+        ),
+        selectedLead:
+          state.selectedLead?.id === leadId
+            ? { ...state.selectedLead, parked }
+            : state.selectedLead,
+      }));
+      return res;
+    } catch (error) {
+      const errorMessage =
+        error.response?.data?.error ||
+        error.message ||
+        "Failed to update parked status";
+      set({ error: errorMessage });
+      throw error;
+    }
+  },
+
+  // Create proposal
+  createProposal: async (leadId, proposalData) => {
+    set({ loading: true, error: null });
+    try {
+      const res = await consultantService.createProposal(leadId, proposalData);
+      set((state) => ({
+        proposals: [...state.proposals, res],
+        loading: false,
+      }));
+      return res;
+    } catch (error) {
+      const errorMessage =
+        error.response?.data?.error ||
+        error.message ||
+        "Failed to create proposal";
+      set({ error: errorMessage, loading: false });
+      throw error;
+    }
+  },
+
+  // Fetch proposals
+  fetchProposals: async (status = "") => {
+    set({ loading: true, error: null });
+    try {
+      const res = await consultantService.getProposals(status);
+      set({ proposals: res.proposals, loading: false });
+      return res;
+    } catch (error) {
+      const errorMessage =
+        error.response?.data?.error ||
+        error.message ||
+        "Failed to fetch proposals";
+      set({ error: errorMessage, loading: false });
+      throw error;
+    }
+  },
+
+  // Fetch proposals by lead
+  fetchProposalsByLead: async (leadId) => {
+    set({ loading: true, error: null });
+    try {
+      const res = await consultantService.getProposalsByLead(leadId);
+      return res.proposals;
+    } catch (error) {
+      const errorMessage =
+        error.response?.data?.error ||
+        error.message ||
+        "Failed to fetch proposals for lead";
+      set({ error: errorMessage, loading: false });
+      throw error;
+    }
+  },
+
+  // Update proposal
+  updateProposal: async (proposalId, proposalData) => {
+    try {
+      const res = await consultantService.updateProposal(
+        proposalId,
+        proposalData
+      );
+      set((state) => ({
+        proposals: state.proposals.map((proposal) =>
+          proposal.id === proposalId ? res : proposal
+        ),
+      }));
+      return res;
+    } catch (error) {
+      const errorMessage =
+        error.response?.data?.error ||
+        error.message ||
+        "Failed to update proposal";
+      set({ error: errorMessage });
+      throw error;
+    }
+  },
+
+  // Delete proposal
+  deleteProposal: async (proposalId) => {
+    try {
+      await consultantService.deleteProposal(proposalId);
+      set((state) => ({
+        proposals: state.proposals.filter(
+          (proposal) => proposal.id !== proposalId
+        ),
+      }));
+    } catch (error) {
+      const errorMessage =
+        error.response?.data?.error ||
+        error.message ||
+        "Failed to delete proposal";
       set({ error: errorMessage });
       throw error;
     }
