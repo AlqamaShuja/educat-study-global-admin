@@ -1,18 +1,17 @@
 import React, { Suspense, useEffect, useLayoutEffect } from "react";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import { NotificationProvider } from "./contexts/NotificationContext";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { routes, getDefaultRouteByRole } from "./config/routes";
 import useAuthStore from "./stores/authStore";
 import LoadingSpinner from "./components/ui/LoadingSpinner";
 import ErrorBoundary from "./components/ui/ErrorBoundary";
 import Layout from "./components/layout/Layout";
+import { initializeSocketConnection } from "./utils/socketInitializer";
 
 // Component to handle role-based protection
 const PrivateRoute = ({ component: Component, roles, isPublic }) => {
   const { user, loading } = useAuthStore();
-
-  // console.log(user, "sakcnancasncssac", loading);
 
   if (loading) {
     return (
@@ -44,9 +43,10 @@ const PrivateRoute = ({ component: Component, roles, isPublic }) => {
 
 // Default route handler
 const DefaultRoute = () => {
-  const { user, isLoading } = useAuthStore();
+  const { user, loading } = useAuthStore();
+  const location = useLocation();
 
-  if (isLoading) {
+  if (loading) {
     return (
       <div className="flex justify-center items-center h-screen">
         <LoadingSpinner size="lg" />
@@ -54,19 +54,28 @@ const DefaultRoute = () => {
     );
   }
 
-  const defaultRoute = getDefaultRouteByRole(user?.role);
-  return <Navigate to={defaultRoute} replace />;
+  // Only redirect if we're actually on the root path
+  if (location.pathname === "/") {
+    const defaultRoute = getDefaultRouteByRole(user?.role);
+    return <Navigate to={defaultRoute} replace />;
+  }
+
+  // If we're not on root path, don't redirect
+  return null;
 };
 
 function App() {
   const { user, initializeAuth, loading } = useAuthStore();
 
+  // Initialize auth and socket connection
   useEffect(() => {
-    initializeAuth(); // Store handles everything
+    initializeAuth();
+
+    // Initialize socket connection (this will handle auth state changes automatically)
+    initializeSocketConnection();
   }, []);
 
-  console.log(user, loading, 'asncjasncascjacnsnas');
-  
+  console.log(user, loading, "Auth state in App");
 
   if (loading) {
     return (
@@ -120,3 +129,125 @@ function App() {
 }
 
 export default App;
+
+// import React, { Suspense, useEffect, useLayoutEffect } from "react";
+// import { ThemeProvider } from "./contexts/ThemeContext";
+// import { NotificationProvider } from "./contexts/NotificationContext";
+// import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+// import { routes, getDefaultRouteByRole } from "./config/routes";
+// import useAuthStore from "./stores/authStore";
+// import LoadingSpinner from "./components/ui/LoadingSpinner";
+// import ErrorBoundary from "./components/ui/ErrorBoundary";
+// import Layout from "./components/layout/Layout";
+
+// // Component to handle role-based protection
+// const PrivateRoute = ({ component: Component, roles, isPublic }) => {
+//   const { user, loading } = useAuthStore();
+
+//   // console.log(user, "sakcnancasncssac", loading);
+
+//   if (loading) {
+//     return (
+//       <div className="flex justify-center items-center h-screen">
+//         <LoadingSpinner size="lg" />
+//       </div>
+//     );
+//   }
+
+//   if (isPublic) {
+//     return <Component />;
+//   }
+
+//   if (!user && !loading) {
+//     return <Navigate to="/login" replace />;
+//   }
+
+//   if (roles && roles.length > 0 && !roles.includes(user.role)) {
+//     return <Navigate to="/unauthorized" replace />;
+//   }
+
+//   // Wrap protected routes with Layout
+//   return (
+//     <Layout>
+//       <Component />
+//     </Layout>
+//   );
+// };
+
+// // Default route handler
+// const DefaultRoute = () => {
+//   const { user, isLoading } = useAuthStore();
+
+//   if (isLoading) {
+//     return (
+//       <div className="flex justify-center items-center h-screen">
+//         <LoadingSpinner size="lg" />
+//       </div>
+//     );
+//   }
+
+//   const defaultRoute = getDefaultRouteByRole(user?.role);
+//   return <Navigate to={defaultRoute} replace />;
+// };
+
+// function App() {
+//   const { user, initializeAuth, loading } = useAuthStore();
+
+//   useEffect(() => {
+//     initializeAuth(); // Store handles everything
+//   }, []);
+
+//   console.log(user, loading, 'asncjasncascjacnsnas');
+
+//   if (loading) {
+//     return (
+//       <div className="flex justify-center items-center h-screen bg-background">
+//         <div className="text-center">
+//           <LoadingSpinner size="lg" />
+//           <p className="mt-4 text-foreground">Loading application...</p>
+//         </div>
+//       </div>
+//     );
+//   }
+
+//   return (
+//     <ErrorBoundary>
+//       <ThemeProvider>
+//         <NotificationProvider userId={user?.id || ""}>
+//           <BrowserRouter>
+//             <Suspense
+//               fallback={
+//                 <div className="flex justify-center items-center h-screen">
+//                   <LoadingSpinner size="lg" />
+//                 </div>
+//               }
+//             >
+//               <Routes>
+//                 {routes.map(({ path, component, roles, isPublic }) => (
+//                   <Route
+//                     key={path}
+//                     path={path}
+//                     element={
+//                       <PrivateRoute
+//                         component={component}
+//                         roles={roles}
+//                         isPublic={isPublic}
+//                       />
+//                     }
+//                   />
+//                 ))}
+//                 <Route path="/" element={<DefaultRoute />} />
+//                 <Route
+//                   path="*"
+//                   element={<Navigate to="/not-found" replace />}
+//                 />
+//               </Routes>
+//             </Suspense>
+//           </BrowserRouter>
+//         </NotificationProvider>
+//       </ThemeProvider>
+//     </ErrorBoundary>
+//   );
+// }
+
+// export default App;
