@@ -684,3 +684,13 @@ export const deepEqual = (obj1, obj2) => {
 
   return true;
 };
+
+export const REGIONS = [
+  { value: "north_america", label: "North America" },
+  { value: "south_america", label: "South America" },
+  { value: "europe", label: "Europe" },
+  { value: "asia_pacific", label: "Asia Pacific" },
+  { value: "middle_east", label: "Middle East" },
+  { value: "africa", label: "Africa" },
+  { value: "oceania", label: "Oceania" },
+];

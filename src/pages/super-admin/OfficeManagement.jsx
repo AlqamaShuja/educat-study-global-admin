@@ -7,11 +7,23 @@ import Badge from "../../components/ui/Badge";
 import LoadingSpinner from "../../components/ui/LoadingSpinner";
 import ConfirmDialog from "../../components/ui/ConfirmDialog";
 import DataTable from "../../components/tables/DataTable";
-import TableFilters from "../../components/tables/TableFilters";
-import { Plus, Edit, Trash2, MapPin, Users, Phone, Mail, Eye } from "lucide-react";
+import {
+  Plus,
+  Edit,
+  Trash2,
+  MapPin,
+  Users,
+  Phone,
+  Mail,
+  Eye,
+  Globe,
+  Search,
+  Filter,
+} from "lucide-react";
 import useUIStore from "../../stores/uiStore";
 import OfficeFormModal from "../../components/forms/OfficeFormModal";
 import { useNavigate } from "react-router-dom";
+import { REGIONS } from "../../utils/helpers";
 
 const OfficeManagement = () => {
   const {
@@ -34,6 +46,7 @@ const OfficeManagement = () => {
     status: "",
     country: "",
     hasManager: "",
+    region: "",
   });
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -41,6 +54,7 @@ const OfficeManagement = () => {
   const [deleteConfirm, setDeleteConfirm] = useState(null);
   const [formData, setFormData] = useState({
     name: "",
+    region: "",
     address: {
       street: "",
       city: "",
@@ -91,6 +105,7 @@ const OfficeManagement = () => {
   const resetForm = () => {
     setFormData({
       name: "",
+      region: "",
       address: {
         street: "",
         city: "",
@@ -120,6 +135,7 @@ const OfficeManagement = () => {
       managerId: "",
       consultants: [],
       isActive: true,
+      isBranch: false,
     });
   };
 
@@ -169,6 +185,7 @@ const OfficeManagement = () => {
     setSelectedOffice(office);
     setFormData({
       name: office.name || "",
+      region: office.region || "",
       address: office.address || {
         street: "",
         city: "",
@@ -204,6 +221,7 @@ const OfficeManagement = () => {
       managerId: office.managerId || "",
       consultants: office.consultants?.map((c) => c.id) || [],
       isActive: office.isActive !== undefined ? office.isActive : true,
+      isBranch: office.isBranch || false,
     });
     setIsEditModalOpen(true);
   };
@@ -215,27 +233,56 @@ const OfficeManagement = () => {
     }));
   };
 
+  const clearAllFilters = () => {
+    setFilters({
+      status: "",
+      country: "",
+      hasManager: "",
+      region: "",
+    });
+    setSearchTerm("");
+  };
+
   const getStatusBadge = (isActive) => {
     return (
       <Badge
         color={isActive ? "green" : "gray"}
         className="flex items-center gap-1"
       >
-        {/* {isActive ? (
-          <ToggleRight className="w-3 h-3" />
-        ) : (
-          <ToggleLeft className="w-3 h-3" />
-        )} */}
         {isActive ? "Active" : "Inactive"}
       </Badge>
     );
+  };
+
+  const getRegionDisplay = (region) => {
+    const regionMap = {
+      north_america: "North America",
+      south_america: "South America",
+      europe: "Europe",
+      asia_pacific: "Asia Pacific",
+      middle_east: "Middle East",
+      africa: "Africa",
+      oceania: "Oceania",
+    };
+    return regionMap[region] || region || "Not Set";
+  };
+
+  // Get unique countries from offices for the filter dropdown
+  const getUniqueCountries = () => {
+    if (!offices || offices.length === 0) return [];
+
+    const countries = offices
+      .map((office) => office.address?.country)
+      .filter((country) => country && country !== "");
+
+    return [...new Set(countries)].sort();
   };
 
   const filteredOffices =
     offices
       ?.map((office) => ({
         ...office,
-        consultants: office.consultants || [], // Normalize consultants to empty array
+        consultants: office.consultants || [],
       }))
       .filter((office) => {
         const matchesSearch =
@@ -252,17 +299,24 @@ const OfficeManagement = () => {
 
         const matchesCountry =
           !filters.country ||
-          office.address?.country
-            ?.toLowerCase()
-            .includes(filters.country.toLowerCase());
+          office.address?.country?.toLowerCase() ===
+            filters.country.toLowerCase();
 
         const matchesManager =
           !filters.hasManager ||
           (filters.hasManager === "yes" && office.managerId) ||
           (filters.hasManager === "no" && !office.managerId);
 
+        // Fixed: Now filtering by region value instead of display name
+        const matchesRegion =
+          !filters.region || office.region === filters.region;
+
         return (
-          matchesSearch && matchesStatus && matchesCountry && matchesManager
+          matchesSearch &&
+          matchesStatus &&
+          matchesCountry &&
+          matchesManager &&
+          matchesRegion
         );
       }) || [];
 
@@ -278,6 +332,19 @@ const OfficeManagement = () => {
             <MapPin className="w-3 h-3" />
             {office.address?.city}, {office.address?.country}
           </div>
+        </div>
+      ),
+    },
+    {
+      key: "region",
+      header: "Region",
+      sortable: true,
+      render: (_, office) => (
+        <div className="flex items-center gap-1">
+          <Globe className="w-4 h-4 text-gray-500" />
+          <span className="text-sm text-gray-700">
+            {getRegionDisplay(office.region)}
+          </span>
         </div>
       ),
     },
@@ -388,7 +455,9 @@ const OfficeManagement = () => {
           <Button
             size="sm"
             variant="outline"
-            onClick={() => navigate(`/super-admin/office/${office?.id}`, { state: office })}
+            onClick={() =>
+              navigate(`/super-admin/office/${office?.id}`, { state: office })
+            }
             className="text-blue-600 hover:bg-blue-50 border-blue-300"
           >
             <Eye className="w-4 h-4" />
@@ -414,41 +483,6 @@ const OfficeManagement = () => {
     },
   ];
 
-  const filterOptions = [
-    {
-      key: "status",
-      label: "Status",
-      type: "select",
-      options: [
-        { value: "", label: "All Statuses" },
-        { value: "active", label: "Active" },
-        { value: "inactive", label: "Inactive" },
-      ],
-    },
-    {
-      key: "country",
-      label: "Country",
-      type: "select",
-      options: [
-        { value: "", label: "All Countries" },
-        { value: "pakistan", label: "Pakistan" },
-        { value: "uae", label: "UAE" },
-        { value: "uk", label: "United Kingdom" },
-        { value: "canada", label: "Canada" },
-      ],
-    },
-    {
-      key: "hasManager",
-      label: "Manager",
-      type: "select",
-      options: [
-        { value: "", label: "All Offices" },
-        { value: "yes", label: "Has Manager" },
-        { value: "no", label: "No Manager" },
-      ],
-    },
-  ];
-
   if (isLoading && !offices?.length) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-blue-50">
@@ -470,8 +504,28 @@ const OfficeManagement = () => {
             Office Management
           </h1>
           <p className="text-gray-600 mt-2">
-            Manage your offices and their details efficiently
+            Manage your offices and their details efficiently across all regions
           </p>
+          <div className="flex items-center gap-4 mt-3">
+            <div className="text-sm text-gray-500">
+              Total Offices:{" "}
+              <span className="font-semibold text-blue-600">
+                {filteredOffices.length}
+              </span>
+            </div>
+            <div className="text-sm text-gray-500">
+              Active:{" "}
+              <span className="font-semibold text-green-600">
+                {filteredOffices.filter((office) => office.isActive).length}
+              </span>
+            </div>
+            <div className="text-sm text-gray-500">
+              Inactive:{" "}
+              <span className="font-semibold text-red-600">
+                {filteredOffices.filter((office) => !office.isActive).length}
+              </span>
+            </div>
+          </div>
         </div>
         <Button
           onClick={() => setIsCreateModalOpen(true)}
@@ -484,17 +538,99 @@ const OfficeManagement = () => {
 
       {/* Search and Filters */}
       <div className="mb-6 bg-white p-6 rounded-2xl shadow-lg border border-blue-100">
-        <div className="flex flex-col w-full lg:flex-row gap-4 items-center">
-          <TableFilters
-            filters={filterOptions}
-            activeFilters={filters}
-            onFilterChange={handleFilterChange}
-            onClearFilters={() =>
-              setFilters({ status: "", country: "", hasManager: "" })
-            }
-            showDateRange={false}
-            className="w-full"
-          />
+        <div className="space-y-4">
+          {/* Search Bar */}
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+            <input
+              type="text"
+              placeholder="Search offices by name or city..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+
+          {/* Filters */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            {/* Status Filter */}
+            <div className="relative">
+              <Filter className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+              <select
+                value={filters.status}
+                onChange={(e) => handleFilterChange("status", e.target.value)}
+                className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 appearance-none bg-white"
+              >
+                <option value="">All Statuses</option>
+                <option value="active">Active</option>
+                <option value="inactive">Inactive</option>
+              </select>
+            </div>
+
+            {/* Region Filter */}
+            <div className="relative">
+              <Globe className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+              <select
+                value={filters.region}
+                onChange={(e) => handleFilterChange("region", e.target.value)}
+                className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 appearance-none bg-white"
+              >
+                <option value="">All Regions</option>
+                {REGIONS.map(({ value, label }) => (
+                  <option key={value} value={value}>
+                    {label}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Country Filter */}
+            <div className="relative">
+              <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+              <select
+                value={filters.country}
+                onChange={(e) => handleFilterChange("country", e.target.value)}
+                className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 appearance-none bg-white"
+              >
+                <option value="">All Countries</option>
+                {getUniqueCountries().map((country) => (
+                  <option key={country} value={country}>
+                    {country}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Manager Filter */}
+            <div className="relative">
+              <Users className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+              <select
+                value={filters.hasManager}
+                onChange={(e) =>
+                  handleFilterChange("hasManager", e.target.value)
+                }
+                className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 appearance-none bg-white"
+              >
+                <option value="">All Offices</option>
+                <option value="yes">Has Manager</option>
+                <option value="no">No Manager</option>
+              </select>
+            </div>
+          </div>
+
+          {/* Clear Filters Button */}
+          {(searchTerm ||
+            Object.values(filters).some((filter) => filter !== "")) && (
+            <div className="flex justify-end">
+              <Button
+                onClick={clearAllFilters}
+                variant="outline"
+                className="text-gray-600 border-gray-300 hover:bg-gray-50"
+              >
+                Clear All Filters
+              </Button>
+            </div>
+          )}
         </div>
       </div>
 
@@ -502,6 +638,10 @@ const OfficeManagement = () => {
       <Card className="bg-white rounded-2xl shadow-lg border border-blue-100 overflow-hidden">
         <div className="bg-gradient-to-tr from-blue-700 to-purple-800 text-white p-4 rounded-t-2xl">
           <h2 className="text-lg font-semibold">All Offices</h2>
+          <p className="text-blue-100 text-sm mt-1">
+            {filteredOffices.length} office
+            {filteredOffices.length !== 1 ? "s" : ""} found
+          </p>
         </div>
         <DataTable
           data={filteredOffices}
@@ -509,9 +649,12 @@ const OfficeManagement = () => {
           loading={isLoading}
           emptyMessage={
             <div className="text-center py-12 text-gray-500">
+              <Globe className="w-16 h-16 mx-auto mb-4 text-gray-300" />
               <p className="text-lg">No offices found</p>
               <p className="mt-2">
-                Click "Add Office" to create your first office
+                {searchTerm || Object.values(filters).some((f) => f)
+                  ? "Try adjusting your search criteria or filters"
+                  : 'Click "Add Office" to create your first office'}
               </p>
             </div>
           }

@@ -131,10 +131,10 @@ const useUserStore = create((set, get) => ({
     }
   },
   
-  fetchSuperAdminDashboard: async () => {
+  fetchSuperAdminDashboard: async (queryParams = {}) => {
     set({ isLoading: true, error: null });
     try {
-      const data = await userService.getSuperAdminDashboardData();
+      const data = await userService.getSuperAdminDashboardData(queryParams);
       set((state) => ({
         dashboard: data,
       }));

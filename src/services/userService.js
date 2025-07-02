@@ -47,7 +47,7 @@ const userService = {
       const response = await api.get(`/super-admin/staff/${id}`);
       return response.data;
     } catch (error) {
-      console.error('Error fetching staff member:', error);
+      console.error("Error fetching staff member:", error);
       throw new Error(
         error.response?.data?.message || "Failed to fetch staff member"
       );
@@ -73,13 +73,13 @@ const userService = {
     try {
       const response = await api.get("/super-admin/students");
       console.log(response, "akcsnaskncacnsnc");
-      
+
       return response;
     } catch (error) {
       throw new Error(error.response?.data?.message || "Failed to fetch staff");
     }
   },
-  
+
   /**
    * Get all staff members
    * @returns {Promise<Array>} List of staff objects
@@ -88,28 +88,44 @@ const userService = {
     try {
       const response = await api.post("/super-admin/leads/assign", data);
       console.log(response, "akcsnaskncacnsnc");
-      
+
       return response;
     } catch (error) {
       throw new Error(error.response?.data?.message || "Failed to fetch staff");
     }
   },
-  
+
   /**
    * Get all staff members
    * @returns {Promise<Array>} List of staff objects
    */
-  getSuperAdminDashboardData: async () => {
+  getSuperAdminDashboardData: async (queryParams = {}) => {
     try {
-      const response = await api.get("/super-admin/dashboard");
-      console.log(response, "akcsnaskncacnsnc");
-      
+      // Build query string from parameters
+      const searchParams = new URLSearchParams();
+
+      Object.keys(queryParams).forEach((key) => {
+        if (queryParams[key] !== undefined && queryParams[key] !== "") {
+          searchParams.append(key, queryParams[key]);
+        }
+      });
+
+      const queryString = searchParams.toString();
+      const url = queryString
+        ? `/super-admin/dashboard?${queryString}`
+        : "/super-admin/dashboard";
+
+      const response = await api.get(url);
+      console.log(response, "Dashboard response with filters:", queryParams);
+
       return response.data;
     } catch (error) {
-      throw new Error(error.response?.data?.message || "Failed to fetch staff");
+      throw new Error(
+        error.response?.data?.message || "Failed to fetch dashboard data"
+      );
     }
   },
-  
+
   /**
    * Get all staff members
    * @returns {Promise<Array>} List of staff objects
@@ -118,7 +134,7 @@ const userService = {
     try {
       const response = await api.get("/super-admin/staff");
       console.log(response, "akcsnaskncacnsnc");
-      
+
       return response;
     } catch (error) {
       throw new Error(error.response?.data?.message || "Failed to fetch staff");
@@ -166,7 +182,10 @@ const userService = {
       return response;
     } catch (error) {
       throw new Error(
-        error.response?.data?.message || error.message || error || "Failed to create staff"
+        error.response?.data?.message ||
+          error.message ||
+          error ||
+          "Failed to create staff"
       );
     }
   },
@@ -183,7 +202,10 @@ const userService = {
       return response;
     } catch (error) {
       throw new Error(
-        error.response?.data?.message || error.message || error || "Failed to update staff"
+        error.response?.data?.message ||
+          error.message ||
+          error ||
+          "Failed to update staff"
       );
     }
   },
@@ -211,7 +233,9 @@ const userService = {
    */
   toggleStaffStatus: async (id, isActive) => {
     try {
-      const response = await api.put(`/super-admin/staff/${id}/status`, { isActive });
+      const response = await api.put(`/super-admin/staff/${id}/status`, {
+        isActive,
+      });
       return response;
     } catch (error) {
       throw new Error(
