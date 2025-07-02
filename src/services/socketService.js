@@ -18,7 +18,7 @@ class SocketService {
    */
   connect(
     token,
-    serverUrl = process.env.VITE_API_BASE_URL
+    serverUrl = import.meta.env.VITE_API_BASE_URL.replace("/api/v1"),
   ) {
     if (this.socket?.connected) {
       return Promise.resolve();

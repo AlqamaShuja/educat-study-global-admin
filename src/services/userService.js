@@ -37,6 +37,23 @@ const userService = {
    * @param {Object} payload - { currentPassword, newPassword }
    * @returns {Promise<Object>} Success response
    */
+  /**
+   * Get staff member by ID
+   * @param {string} id - Staff member ID
+   * @returns {Promise<Object>} Staff member details
+   */
+  getStaffById: async (id) => {
+    try {
+      const response = await api.get(`/super-admin/staff/${id}`);
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching staff member:', error);
+      throw new Error(
+        error.response?.data?.message || "Failed to fetch staff member"
+      );
+    }
+  },
+
   changePassword: async (payload) => {
     try {
       const response = await api.put("/auth/change-password", payload);

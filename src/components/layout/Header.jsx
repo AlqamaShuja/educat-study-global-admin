@@ -52,6 +52,9 @@ const Header = ({ onMenuClick, onSidebarToggle, user }) => {
     if (location.pathname.includes("/monitoring")) {
       return "Conversation Monitor";
     }
+    if (location.pathname.includes("/staff/details/")) {
+      return "Staff Details";
+    }
 
     const pathSegments = location.pathname.split("/").filter(Boolean);
     if (pathSegments.length === 0) return "Dashboard";

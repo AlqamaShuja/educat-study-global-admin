@@ -19,6 +19,9 @@ const EditOffice = lazy(() => import("../pages/super-admin/EditOffice"));
 const StaffManagement = lazy(() =>
   import("../pages/super-admin/StaffManagement")
 );
+const StaffDetails = lazy(() =>
+  import("../pages/super-admin/staff/StaffDetails")
+);
 const CreateStaff = lazy(() => import("../pages/super-admin/CreateStaff"));
 const EditStaff = lazy(() => import("../pages/super-admin/EditStaff"));
 const SystemReports = lazy(() => import("../pages/super-admin/SystemReports"));
@@ -193,6 +196,11 @@ export const routes = [
   {
     path: "/super-admin/staff",
     component: StaffManagement,
+    roles: ["super_admin"],
+  },
+  {
+    path: "/super-admin/staff/details/:id",
+    component: StaffDetails,
     roles: ["super_admin"],
   },
   {

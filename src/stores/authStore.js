@@ -9,7 +9,7 @@ const useAuthStore = create(
     // Authentication state (keeping your existing structure)
     user: null,
     isAuthenticated: false,
-    loading: false, // keeping your 'loading' instead of 'isLoading'
+    loading: true, // keeping your 'loading' instead of 'isLoading'
     error: null,
 
     // Enhanced features - permissions and role info

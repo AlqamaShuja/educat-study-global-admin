@@ -3,6 +3,7 @@ import userService from "../services/userService";
 import { toast } from "react-toastify";
 
 const useUserStore = create((set, get) => ({
+  currentStaff: null,
   profile: null,
   users: [],
   students: [],
@@ -10,6 +11,21 @@ const useUserStore = create((set, get) => ({
   isLoading: false,
   error: null,
   dashboard: {},
+
+  getStaffById: async (id) => {
+    set({ isLoading: true, error: null });
+    try {
+      const staff = await userService.getStaffById(id);
+      set({ currentStaff: staff });
+      return staff;
+    } catch (error) {
+      set({ error: error.message || "Failed to fetch staff member" });
+      toast.error("Failed to fetch staff member");
+      throw error;
+    } finally {
+      set({ isLoading: false });
+    }
+  },
 
 
   fetchProfile: async () => {
