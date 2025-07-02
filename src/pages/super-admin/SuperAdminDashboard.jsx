@@ -197,10 +197,11 @@ const SuperAdminDashboard = () => {
     ([status, count]) => {
       // Map status to more readable names for the new status values
       const statusDisplayNames = {
-        lead: "New Leads",
+        lead: "Leads",
         opportunity: "Opportunities",
-        project: "Active Projects",
-        done: "Completed",
+        project: "Projects",
+        done: "Done",
+        deal: "Deal",
       };
 
       return {
@@ -496,7 +497,7 @@ const SuperAdminDashboard = () => {
             <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-4 border border-blue-200">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-blue-700">New Leads</p>
+                  <p className="text-sm font-medium text-blue-700">Leads</p>
                   <p className="text-2xl font-bold text-blue-900">
                     {leadStatusBreakdown?.lead || 0}
                   </p>
@@ -545,7 +546,7 @@ const SuperAdminDashboard = () => {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-purple-700">
-                    Active Projects
+                    Projects
                   </p>
                   <p className="text-2xl font-bold text-purple-900">
                     {leadStatusBreakdown?.project || 0}
@@ -569,9 +570,7 @@ const SuperAdminDashboard = () => {
             <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-xl p-4 border border-green-200">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-green-700">
-                    Completed
-                  </p>
+                  <p className="text-sm font-medium text-green-700">Done</p>
                   <p className="text-2xl font-bold text-green-900">
                     {leadStatusBreakdown?.done || 0}
                   </p>
@@ -587,6 +586,29 @@ const SuperAdminDashboard = () => {
                 </div>
                 <div className="p-2 bg-green-500 rounded-lg">
                   <Target className="h-5 w-5 text-white" />
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-gradient-to-br from-pink-50 to-pink-100 rounded-xl p-4 border border-pink-200">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-pink-700">Deals</p>
+                  <p className="text-2xl font-bold text-pink-900">
+                    {leadStatusBreakdown?.deal || 0}
+                  </p>
+                  <p className="text-xs text-pink-600">
+                    {totalLeads > 0
+                      ? (
+                          ((leadStatusBreakdown?.deal || 0) / totalLeads) *
+                          100
+                        ).toFixed(1)
+                      : 0}
+                    % of total
+                  </p>
+                </div>
+                <div className="p-2 bg-pink-500 rounded-lg">
+                  <UserPlus className="h-5 w-5 text-white" />
                 </div>
               </div>
             </div>
