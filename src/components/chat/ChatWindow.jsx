@@ -146,7 +146,7 @@ const ChatWindow = ({
           senderId: message.senderId,
           sender: message.sender,
           messages: [message],
-          id: `group-${message.id}`,
+          id: `group-${message?.id}`,
         };
         groups.push(currentGroup);
       }
@@ -403,23 +403,23 @@ const ChatWindow = ({
         )}
 
         {/* Messages */}
-        {groupedMessages.map((group) => {
-          if (group.type === "date") {
-            return <DateSeparator key={group.id} date={group.date} />;
+        {groupedMessages?.map((group) => {
+          if (group?.type === "date") {
+            return <DateSeparator key={group?.id} date={group.date} />;
           }
 
           const isOwnMessage = group.senderId === currentUser?.id;
 
           return (
-            <div key={group.id} className="space-y-1">
-              {group.messages.map((message, index) => {
+            <div key={group?.id} className="space-y-1">
+              {group?.messages?.map((message, index) => {
                 const isGrouped = index > 0;
                 const canEdit = isOwnMessage && message.type === "text";
                 const canDelete = isOwnMessage;
 
                 return (
                   <MessageBubble
-                    key={message.id}
+                    key={message?.id}
                     message={message}
                     isOwn={isOwnMessage}
                     showAvatar={!isGrouped}

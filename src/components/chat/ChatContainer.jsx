@@ -399,7 +399,7 @@ const ChatContainer = ({ className = "" }) => {
       <ErrorBanner /> */}
 
       {/* Mobile Header */}
-      {isMobile && (
+      {/* {isMobile && (
         <div className="fixed top-0 left-0 right-0 bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between z-30">
           <button
             onClick={() => setShowSidebar(true)}
@@ -430,7 +430,7 @@ const ChatContainer = ({ className = "" }) => {
             {showUserMenu && <UserMenu />}
           </div>
         </div>
-      )}
+      )} */}
 
       {/* Sidebar */}
       <div
@@ -442,7 +442,7 @@ const ChatContainer = ({ className = "" }) => {
       `}
       >
         {/* Sidebar Header */}
-        {!isMobile && (
+        {/* {!isMobile && (
           <div className="flex-shrink-0 bg-white border-b border-gray-200 px-4 py-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-3">
@@ -472,7 +472,7 @@ const ChatContainer = ({ className = "" }) => {
               </div>
             </div>
           </div>
-        )}
+        )} */}
 
         {/* Mobile Close Button */}
         {isMobile && (

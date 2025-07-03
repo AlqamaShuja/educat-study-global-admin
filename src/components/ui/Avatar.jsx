@@ -72,7 +72,7 @@ const Avatar = ({
       "bg-cyan-500",
     ];
 
-    const id = user.id || user.email || user.name || "";
+    const id = user?.id || user?.email || user?.name || "";
     const hash = id.split("").reduce((acc, char) => {
       return char.charCodeAt(0) + ((acc << 5) - acc);
     }, 0);
@@ -194,7 +194,7 @@ export const AvatarGroup = ({
     <div className={`flex items-center ${groupSizeClasses[size]} ${className}`}>
       {displayUsers.map((user, index) => (
         <Avatar
-          key={user.id || index}
+          key={user?.id || index}
           user={user}
           size={size}
           showOnlineStatus={false}

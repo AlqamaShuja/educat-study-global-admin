@@ -360,7 +360,7 @@ const ConversationList = ({
           <h2 className="text-lg font-semibold text-gray-900">
             {getHeaderTitle()}
           </h2>
-          <div className="flex items-center space-x-2">
+          {/* <div className="flex items-center space-x-2">
             <button
               onClick={() => setShowFilters(!showFilters)}
               className={`p-2 rounded-lg transition-colors ${
@@ -371,7 +371,6 @@ const ConversationList = ({
             >
               <Filter className="w-5 h-5" />
             </button>
-            {/* Hide new conversation button for monitoring roles */}
             {!["manager", "super_admin"].includes(currentUser?.role) && (
               <button
                 onClick={onNewConversation}
@@ -380,7 +379,7 @@ const ConversationList = ({
                 <Plus className="w-5 h-5" />
               </button>
             )}
-          </div>
+          </div> */}
         </div>
 
         {/* Search */}

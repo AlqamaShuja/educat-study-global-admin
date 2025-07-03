@@ -267,6 +267,33 @@ const consultantService = {
     const res = await api.get("/consultant/proposals/stats");
     return res;
   },
+
+  // Create checklist for student
+  async createChecklist(studentId, checklistData) {
+    const res = await api.post(
+      `/checklists/student/${studentId}`,
+      checklistData
+    );
+    return res;
+  },
+
+  // Get student checklists
+  async getStudentChecklists(studentId) {
+    const res = await api.get(`/checklists/student/${studentId}`);
+    return res;
+  },
+
+  // Update checklist
+  async updateChecklist(checklistId, checklistData) {
+    const res = await api.patch(`/checklists/${checklistId}`, checklistData);
+    return res;
+  },
+
+  // Delete checklist
+  async deleteChecklist(checklistId) {
+    const res = await api.delete(`/checklists/${checklistId}`);
+    return res;
+  },
 };
 
 export default consultantService;
