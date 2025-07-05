@@ -694,3 +694,12 @@ export const REGIONS = [
   { value: "africa", label: "Africa" },
   { value: "oceania", label: "Oceania" },
 ];
+
+export const getStaticFileUrl = (filePath) => {
+  const backendApiUrl = import.meta.env.VITE_API_BASE_URL;
+  const backendBaseUrl = backendApiUrl.replace("/api/v1", "");
+  if(filePath && filePath[0] == '/'){
+    return `${backendBaseUrl}${filePath}`;
+  }
+  return `${backendBaseUrl}/${filePath}`;
+};

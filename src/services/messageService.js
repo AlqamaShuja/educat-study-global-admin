@@ -23,10 +23,19 @@ const messageService = {
   async markMessageAsRead(messageId) {
     return apiService.put(`/messages/${messageId}/read`);
   },
+  
 
   // Fetch allowed recipients based on user role
   async getAllowedRecipients() {
     return apiService.get("/messages/users/allowed-recipients");
+  },
+
+  async uploadFile(file) {
+    const formData = new FormData();
+    formData.append("file", file);
+    return apiService.post("/file/upload", formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
   },
 };
 
