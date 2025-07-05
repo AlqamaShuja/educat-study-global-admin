@@ -6,7 +6,7 @@ import { toast } from "react-toastify";
 // Create axios instance
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL || "http://localhost:5009/api/v1",
-//   withCredentials: true,
+  //   withCredentials: true,
 });
 
 // Request interceptor – attach token
@@ -25,9 +25,13 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response.data,
   (error) => {
+    console.log("askcasncjanscasn", error);
+
     const status = error.response?.status;
     const message =
-      error.response?.data?.message || "An unexpected error occurred";
+      error.response?.data?.error ||
+      error.response?.data?.message ||
+      "An unexpected error occurred";
 
     switch (status) {
       case 401:
@@ -39,9 +43,9 @@ api.interceptors.response.use(
       case 403:
         toast.error("Access denied.");
         break;
-      case 500:
-        toast.error("Server error. Please try again later.");
-        break;
+      // case 500:
+      //   toast.error("Server error. Please try again later.");
+      //   break;
       default:
         toast.error(message);
     }
@@ -57,14 +61,14 @@ const apiService = {
   },
 
   async post(endpoint, data = {}, config = {}) {
-    console.log(endpoint, data,);
+    console.log(endpoint, data);
     return api.post(endpoint, data, config);
   },
 
   async patch(endpoint, data = {}, config = {}) {
     return api.patch(endpoint, data, config);
   },
-  
+
   async put(endpoint, data = {}, config = {}) {
     return api.put(endpoint, data, config);
   },

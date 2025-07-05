@@ -98,6 +98,8 @@ const useAuthStore = create(
         });
         return user;
       } catch (err) {
+        console.log("sacmaskcakscacskms:1", err);
+        
         set({ error: err.message || "Login failed" });
         throw err;
       } finally {

@@ -21,7 +21,8 @@ const authService = {
       console.log("Token and user data stored:", { token, user }); // Debug log
       return user;
     } catch (error) {
-      console.error("Login error:", error.message || error);
+      console.log("Login error22:", error);
+      // console.error("Login error:", error.message || error);
       throw new Error(error.message || "Failed to login");
     }
   },

@@ -100,10 +100,6 @@ const AppointmentConfirmations = lazy(() =>
   import("../pages/receptionist/AppointmentConfirmations")
 );
 
-const ConversationMonitorPage = lazy(() =>
-  import("../pages/common/ConversationMonitorPage")
-);
-
 const ChatPage = lazy(() =>
   import("../pages/common/ChatPage")
 );
@@ -380,20 +376,6 @@ export const routes = [
     roles: ["receptionist"],
   },
 
-  // manager & admin
-  {
-    path: '/monitoring',
-    component: ConversationMonitorPage,
-    roles: ['manager', 'super_admin'],
-    title: 'Conversation Monitor'
-  },
-  {
-    path: '/monitoring/conversations',
-    component: ConversationMonitorPage,
-    roles: ['manager', 'super_admin'],
-    title: 'Conversation Monitor'
-  },
-
   // Student Routes
   {
     path: "/student/dashboard",
@@ -467,13 +449,7 @@ export const routes = [
   {
     path: "/chat",
     component: ChatPage,
-    roles: ["lead", "consultant", "receptionist", "manager", "super_admin"],
-    title: "Messages",
-  },
-  {
-    path: "/chat/:conversationId",
-    component: ChatPage,
-    roles: ["lead", "consultant", "receptionist", "manager", "super_admin"],
+    roles: ["consultant", "receptionist", "manager", "super_admin"],
     title: "Messages",
   },
 

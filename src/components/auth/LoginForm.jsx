@@ -9,6 +9,7 @@ import Button from "../ui/Button";
 import Input from "../ui/Input";
 import OAuthButtons from "./OAuthButtons";
 import { getDefaultRouteByRole } from "../../config/routes";
+import { toast } from "react-toastify";
 
 const loginSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
@@ -47,7 +48,10 @@ const LoginForm = () => {
         setError("root", { message: result.error || "Login failed" });
       }
     } catch (err) {
-      setError("root", { message: "An unexpected error occurred" });
+      console.log("sacmaskcakscacskms", err);
+      // toast.error(err);
+      
+      // setError("root", { message: "An unexpected error occurred" });
     }
   };
 

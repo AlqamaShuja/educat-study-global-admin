@@ -1,0 +1,144 @@
+.chat-page {
+  display: flex;
+  height: calc(100vh - 4rem);
+  background: linear-gradient(to bottom right, #eff6ff, #f3e8ff);
+}
+
+.conversation-list {
+  width: 33.333333%;
+  border-right: 1px solid #bfdbfe;
+  background: #ffffff;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.conversation-list-header {
+  padding: 1rem;
+  background: #2563eb;
+  color: #eff6ff;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.conversation-list ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  height: calc(100vh - 8rem);
+  overflow-y: auto;
+}
+
+.conversation-list li {
+  padding: 0.75rem;
+  cursor: pointer;
+  border-bottom: 1px solid #bfdbfe;
+}
+
+.conversation-list li:hover {
+  background: #eff6ff;
+}
+
+.conversation-list li.selected {
+  background: #dbeafe;
+}
+
+.message-area {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background: #ffffff;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.message-area-header {
+  padding: 1rem;
+  background: #7c3aed;
+  color: #f3e8ff;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.message-area ul {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1rem;
+  list-style: none;
+  margin: 0;
+}
+
+.message-area li {
+  padding: 0.75rem;
+  margin: 0.5rem 0;
+  border-radius: 0.5rem;
+}
+
+.message-area li.sent {
+  background: #dbeafe;
+  margin-left: 2.5rem;
+}
+
+.message-area li.received {
+  background: #ede9fe;
+  margin-right: 2.5rem;
+}
+
+.message-form {
+  padding: 1rem;
+  border-top: 1px solid #bfdbfe;
+  display: flex;
+  gap: 0.5rem;
+}
+
+.message-form select,
+.message-form input {
+  flex: 1;
+  padding: 0.5rem;
+  border: 1px solid #bfdbfe;
+  border-radius: 0.25rem;
+  background: #ffffff;
+  color: #1e3a8a;
+}
+
+.message-form button {
+  padding: 0.5rem;
+  background: #2563eb;
+  color: #eff6ff;
+  border-radius: 0.25rem;
+}
+
+.message-form button:hover {
+  background: #1e40af;
+}
+
+.listbox-button {
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid #bfdbfe;
+  border-radius: 0.25rem;
+  background: #ffffff;
+  color: #1e3a8a;
+  text-align: left;
+}
+
+.listbox-options {
+  position: absolute;
+  width: 100%;
+  margin-top: 0.25rem;
+  background: #ffffff;
+  border: 1px solid #bfdbfe;
+  border-radius: 0.25rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  max-height: 15rem;
+  overflow-y: auto;
+}
+
+.listbox-option {
+  padding: 0.5rem;
+  cursor: pointer;
+  color: #1e3a8a;
+}
+
+.listbox-option:hover {
+  background: #eff6ff;
+}
