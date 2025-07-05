@@ -54,7 +54,9 @@ const ConversationList = ({
     };
 
     if (user && user.id) {
-      fetchConversations();
+      if (user?.role === "super_admin") {
+        fetchConversations();
+      }
       fetchAllowedRecipients();
       fetchUnreadCounts();
 
@@ -66,7 +68,9 @@ const ConversationList = ({
           newMessage.senderId === user.id ||
           newMessage.recipientId === user.id
         ) {
-          fetchConversations();
+          if (user?.role === "super_admin") {
+            fetchConversations();
+          }
           // Incrementally update unread count for the specific conversation
 
           console.log(
@@ -242,6 +246,8 @@ const ConversationList = ({
     return bDate - aDate;
   });
 
+  console.log(allItems, "ascakcnasnsacnasnca", conversations);
+
   // Filter items based on search query
   const filteredItems = allItems.filter((item) =>
     item.displayName.toLowerCase().includes(searchQuery.toLowerCase())
@@ -345,7 +351,7 @@ const ConversationList = ({
                       item.displayName.charAt(0).toUpperCase()}
 
                     {/* Online indicator */}
-                    <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 border-2 border-white rounded-full"></div>
+                    {/* <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 border-2 border-white rounded-full"></div> */}
                   </div>
 
                   {/* Conversation Info */}

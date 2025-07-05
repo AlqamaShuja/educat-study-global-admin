@@ -469,103 +469,103 @@ const Sidebar = ({ onClose, user }) => {
           ),
         },
       ],
-      student: [
-        {
-          name: "Dashboard",
-          href: "/student/dashboard",
-          icon: (
-            <svg
-              className="w-5 h-5"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z"
-              />
-            </svg>
-          ),
-        },
-        {
-          name: "My Profile",
-          href: "/student/profile",
-          icon: (
-            <svg
-              className="w-5 h-5"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-              />
-            </svg>
-          ),
-        },
-        {
-          name: "Application Status",
-          href: "/student/applications",
-          icon: (
-            <svg
-              className="w-5 h-5"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"
-              />
-            </svg>
-          ),
-        },
-        {
-          name: "Documents",
-          href: "/student/documents",
-          icon: (
-            <svg
-              className="w-5 h-5"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-              />
-            </svg>
-          ),
-        },
-        {
-          name: "Appointments",
-          href: "/student/appointments",
-          icon: (
-            <svg
-              className="w-5 h-5"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-              />
-            </svg>
-          ),
-        },
-      ],
+      // student: [
+      //   {
+      //     name: "Dashboard",
+      //     href: "/student/dashboard",
+      //     icon: (
+      //       <svg
+      //         className="w-5 h-5"
+      //         fill="none"
+      //         viewBox="0 0 24 24"
+      //         stroke="currentColor"
+      //       >
+      //         <path
+      //           strokeLinecap="round"
+      //           strokeLinejoin="round"
+      //           strokeWidth={2}
+      //           d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z"
+      //         />
+      //       </svg>
+      //     ),
+      //   },
+      //   {
+      //     name: "My Profile",
+      //     href: "/student/profile",
+      //     icon: (
+      //       <svg
+      //         className="w-5 h-5"
+      //         fill="none"
+      //         viewBox="0 0 24 24"
+      //         stroke="currentColor"
+      //       >
+      //         <path
+      //           strokeLinecap="round"
+      //           strokeLinejoin="round"
+      //           strokeWidth={2}
+      //           d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+      //         />
+      //       </svg>
+      //     ),
+      //   },
+      //   {
+      //     name: "Application Status",
+      //     href: "/student/applications",
+      //     icon: (
+      //       <svg
+      //         className="w-5 h-5"
+      //         fill="none"
+      //         viewBox="0 0 24 24"
+      //         stroke="currentColor"
+      //       >
+      //         <path
+      //           strokeLinecap="round"
+      //           strokeLinejoin="round"
+      //           strokeWidth={2}
+      //           d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"
+      //         />
+      //       </svg>
+      //     ),
+      //   },
+      //   {
+      //     name: "Documents",
+      //     href: "/student/documents",
+      //     icon: (
+      //       <svg
+      //         className="w-5 h-5"
+      //         fill="none"
+      //         viewBox="0 0 24 24"
+      //         stroke="currentColor"
+      //       >
+      //         <path
+      //           strokeLinecap="round"
+      //           strokeLinejoin="round"
+      //           strokeWidth={2}
+      //           d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+      //         />
+      //       </svg>
+      //     ),
+      //   },
+      //   {
+      //     name: "Appointments",
+      //     href: "/student/appointments",
+      //     icon: (
+      //       <svg
+      //         className="w-5 h-5"
+      //         fill="none"
+      //         viewBox="0 0 24 24"
+      //         stroke="currentColor"
+      //       >
+      //         <path
+      //           strokeLinecap="round"
+      //           strokeLinejoin="round"
+      //           strokeWidth={2}
+      //           d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+      //         />
+      //       </svg>
+      //     ),
+      //   },
+      // ],
     };
 
     return [...(roleSpecificItems[user?.role] || [])];
@@ -574,10 +574,10 @@ const Sidebar = ({ onClose, user }) => {
   const navigationItems = getNavigationItems();
 
   const getRoleCapitalize = (role) => {
-    if(!role || role == '') return 'Admin';
+    if (!role || role == "") return "Admin";
     const splitted = role.split("");
     return splitted[0].toUpperCase() + splitted.slice(1).join("");
-  }
+  };
 
   return (
     <div className="flex flex-col h-full bg-card text-foreground border-r border-white">
@@ -587,7 +587,9 @@ const Sidebar = ({ onClose, user }) => {
           <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
             <span className="text-white font-bold text-sm">A</span>
           </div>
-          <span className="text-xl font-semibold">{getRoleCapitalize(user.role)} Panel</span>
+          <span className="text-xl font-semibold">
+            {getRoleCapitalize(user.role)} Panel
+          </span>
         </div>
         {onClose && (
           <button
@@ -630,6 +632,33 @@ const Sidebar = ({ onClose, user }) => {
             <span>{item.name}</span>
           </NavLink>
         ))}
+        <NavLink
+          key={"chat"}
+          to={"/chat"}
+          className={({ isActive }) =>
+            `flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap ${
+              isActive
+                ? "bg-primary/10 text-primary"
+                : "text-muted-foreground hover:bg-muted hover:text-foreground"
+            }`
+          }
+          onClick={onClose}
+        >
+          <svg
+            className="w-5 h-5"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
+            />
+          </svg>
+          <span>Chat</span>
+        </NavLink>
       </nav>
 
       {/* User info and logout */}

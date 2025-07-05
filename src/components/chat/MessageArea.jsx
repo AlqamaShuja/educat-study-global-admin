@@ -159,7 +159,7 @@ const MessageArea = ({
       let fileData = {};
       if (file) {
         const response = await messageService.uploadFile(file);
-        fileData = response.data;
+        fileData = response;
       }
 
       const messageData = {
@@ -233,7 +233,7 @@ const MessageArea = ({
             <a
               href={getStaticFileUrl(msg.fileUrl)}
               download={msg.fileName}
-              className="text-blue-600 hover:text-blue-700 underline flex items-center gap-1 text-sm transition-colors"
+              className="text-gray-200 hover:text-gray-300 underline flex items-center gap-1 text-sm transition-colors"
             >
               <Paperclip className="w-4 h-4" />
               Download {msg.fileName} ({(msg.fileSize / 1024).toFixed(2)} KB)
@@ -417,6 +417,7 @@ const MessageArea = ({
         </div>
       )}
 
+      {/* {console.log(selectedConversation, "ascnasjcascjncjsc")} */}
       {/* Message Input */}
       {selectedConversation?.type === "conversation" &&
       selectedConversation?.conversationHash?.includes("_")
