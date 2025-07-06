@@ -449,25 +449,25 @@ const Sidebar = ({ onClose, user }) => {
             </svg>
           ),
         },
-        {
-          name: "Calendars",
-          href: "/receptionist/calendars",
-          icon: (
-            <svg
-              className="w-5 h-5"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-              />
-            </svg>
-          ),
-        },
+        // {
+        //   name: "Calendars",
+        //   href: "/receptionist/calendars",
+        //   icon: (
+        //     <svg
+        //       className="w-5 h-5"
+        //       fill="none"
+        //       viewBox="0 0 24 24"
+        //       stroke="currentColor"
+        //     >
+        //       <path
+        //         strokeLinecap="round"
+        //         strokeLinejoin="round"
+        //         strokeWidth={2}
+        //         d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+        //       />
+        //     </svg>
+        //   ),
+        // },
       ],
       // student: [
       //   {
@@ -632,7 +632,7 @@ const Sidebar = ({ onClose, user }) => {
             <span>{item.name}</span>
           </NavLink>
         ))}
-        <NavLink
+        {user.role !== 'receptionist' && <NavLink
           key={"chat"}
           to={"/chat"}
           className={({ isActive }) =>
@@ -658,7 +658,7 @@ const Sidebar = ({ onClose, user }) => {
             />
           </svg>
           <span>Chat</span>
-        </NavLink>
+        </NavLink>}
       </nav>
 
       {/* User info and logout */}
