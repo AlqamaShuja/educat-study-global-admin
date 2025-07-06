@@ -50,8 +50,8 @@ const MessageArea = ({
         if (selectedConversation.type === "conversation") {
           // Extract recipientId from conversationHash
           recipientId = selectedConversation.conversationHash
-            .split("_")
-            .find((id) => id !== user.id);
+            // .split("_")
+            // .find((id) => id !== user.id);
         } else {
           // For new conversations (recipient type)
           recipientId = selectedConversation.id;

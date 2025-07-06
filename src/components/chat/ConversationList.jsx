@@ -68,9 +68,9 @@ const ConversationList = ({
           newMessage.senderId === user.id ||
           newMessage.recipientId === user.id
         ) {
-          if (user?.role === "super_admin") {
-            fetchConversations();
-          }
+        //   if (user?.role === "super_admin") {
+        //     fetchConversations();
+        //   }
           // Incrementally update unread count for the specific conversation
 
           console.log(
@@ -99,7 +99,7 @@ const ConversationList = ({
             relevantIds.includes(newMessage.senderId) ||
             relevantIds.includes(newMessage.recipientId)
           ) {
-            fetchConversations();
+            // fetchConversations();
             if (
               selectedConversation?.conversationHash !==
               newMessage.conversationHash
@@ -125,7 +125,7 @@ const ConversationList = ({
         socketService.onMessageRead(null);
       };
     }
-  }, [user, selectedConversation]);
+  }, [user]);
 
   useEffect(() => {
     // Don't start a timer for non-recipient conversations
@@ -156,7 +156,7 @@ const ConversationList = ({
     tick();
 
     // Then every 5 s
-    const id = setInterval(tick, 5000);
+    const id = setInterval(tick, 30000);
 
     // Cleanup
     return () => clearInterval(id);
@@ -172,12 +172,14 @@ const ConversationList = ({
     if (item.type === "conversation") {
       const conversationHash = item.conversationHash;
       try {
+        // console.log(selectedConversation, "ascnascnasjncjsnncascsn");
+        
         // Fetch messages
-        const recipientId = conversationHash
-          .split("_")
-          .find((id) => id !== user.id);
-        const response = await messageService.getMessages(recipientId);
-        setMessages(response.data);
+        const recipientId = item?.conversationHash // || conversationHash
+        //   .split("_")
+        //   .find((id) => id !== user.id);
+        // const response = await messageService.getMessages(recipientId);
+        // setMessages(response.data);
 
         // Mark all messages as read
         // await messageService.markConversationMessagesAsRead(conversationHash);
@@ -189,7 +191,7 @@ const ConversationList = ({
         }));
 
         // Refresh unread counts to ensure consistency
-        const responseUnread = await messageService.getUnreadMessageCount();
+        // const responseUnread = await messageService.getUnreadMessageCount();
         // const counts = responseUnread.data.reduce(
         //   (acc, { conversationHash, unreadCount }) => ({
         //     ...acc,
