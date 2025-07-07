@@ -69,9 +69,6 @@ const AppointmentManagement = lazy(() =>
 const DocumentCollection = lazy(() =>
   import("../pages/consultant/DocumentCollection")
 );
-const CommunicationHistory = lazy(() =>
-  import("../pages/consultant/CommunicationHistory")
-);
 const TaskManagement = lazy(() => import("../pages/consultant/TaskManagement"));
 const ApplicationProgress = lazy(() =>
   import("../pages/consultant/ApplicationProgress")
@@ -316,11 +313,6 @@ export const routes = [
   {
     path: "/consultant/documents",
     component: DocumentCollection,
-    roles: ["consultant"],
-  },
-  {
-    path: "/consultant/communication",
-    component: CommunicationHistory,
     roles: ["consultant"],
   },
   {
