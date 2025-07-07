@@ -1,1 +1,0 @@
-import{d as r}from"./index-B8d-T4_g.js";const t={getAllCourses:async()=>await r.get("/courses"),createCourse:async e=>await r.post("/courses",e),updateCourse:async(e,s)=>await r.put(`/courses/${e}`,s),deleteCourse:async e=>await r.delete(`/courses/${e}`)},a=Object.freeze(Object.defineProperty({__proto__:null,default:t},Symbol.toStringTag,{value:"Module"}));export{t as a,a as c};
