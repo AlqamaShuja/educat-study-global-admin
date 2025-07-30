@@ -43,6 +43,9 @@ const SystemSettings = lazy(() =>
 const LeadManagement = lazy(() =>
   import("../pages/super-admin/LeadManagement")
 );
+const SuperAdminApplicationsPage = lazy(() =>
+  import("../pages/super-admin/ApplicationsPage")
+);
 
 const ManagerDashboard = lazy(() =>
   import("../pages/manager/ManagerDashboard")
@@ -72,6 +75,9 @@ const DocumentCollection = lazy(() =>
 const TaskManagement = lazy(() => import("../pages/consultant/TaskManagement"));
 const ApplicationProgress = lazy(() =>
   import("../pages/consultant/ApplicationProgress")
+);
+const ApplicationsPage = lazy(() =>
+  import("../pages/consultant/ApplicationsPage")
 );
 const MeetingScheduler = lazy(() =>
   import("../pages/consultant/MeetingScheduler")
@@ -242,6 +248,11 @@ export const routes = [
     roles: ["super_admin"],
   },
   {
+    path: "/super-admin/applications",
+    component: SuperAdminApplicationsPage,
+    roles: ["super_admin"],
+  },
+  {
     path: "/super-admin/office/:officeId",
     component: OfficeDetailsPage,
     roles: ["super_admin"],
@@ -322,7 +333,7 @@ export const routes = [
   },
   {
     path: "/consultant/applications",
-    component: ApplicationProgress,
+    component: ApplicationsPage,
     roles: ["consultant"],
   },
   {
