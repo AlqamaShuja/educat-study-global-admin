@@ -4,9 +4,9 @@ import { checkPermission } from "../utils/permissions";
 const usePermissions = () => {
   const { user } = useAuthStore();
 
-  const hasPermission = (permission, resource) => {
+  const hasPermission = (permission) => {
     if (!user || !user.role) return false;
-    return checkPermission(user.role, permission, resource);
+    return checkPermission(user.role, permission);
   };
 
   const canAccessRoute = (routePath) => {

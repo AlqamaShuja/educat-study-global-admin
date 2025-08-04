@@ -10,6 +10,9 @@ import Modal from "../../components/ui/Modal";
 import Input from "../../components/ui/Input";
 import LoadingSpinner from "../../components/ui/LoadingSpinner";
 import ConfirmDeleteScheduleModal from "../../components/manager/ConfirmDeleteScheduleModal";
+import ScheduleTableView from "../../components/schedules/ScheduleTableView";
+import ScheduleCalendarView from "../../components/schedules/ScheduleCalendarView";
+import ScheduleDetailModal from "../../components/schedules/ScheduleDetailModal";
 import {
   Calendar,
   Plus,
@@ -19,6 +22,8 @@ import {
   UserCheck,
   Clock,
   Shield,
+  Table,
+  Grid,
 } from "lucide-react";
 import { toast } from "react-toastify";
 import { addHours } from "date-fns";
@@ -39,12 +44,14 @@ const StaffSchedules = () => {
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showViewModal, setShowViewModal] = useState(false);
   const [selectedSchedule, setSelectedSchedule] = useState(null);
   const [scheduleToDelete, setScheduleToDelete] = useState(null);
   const [formErrors, setFormErrors] = useState({});
   const [students, setStudents] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 10;
+  const [viewMode, setViewMode] = useState("table");
 
   const [scheduleForm, setScheduleForm] = useState({
     studentId: "",
@@ -327,11 +334,42 @@ const StaffSchedules = () => {
         </div>
       </Card>
 
-      {/* Custom Schedules Table */}
+      {/* View Mode Tabs */}
       <Card className="p-4 shadow-sm">
-        <h3 className="text-lg font-semibold mb-4 text-gray-900">
-          Staff Schedules
-        </h3>
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-lg font-semibold text-gray-900">
+            Staff Schedules
+          </h3>
+          <div className="flex space-x-2">
+            <Button
+              variant={viewMode === "table" ? "primary" : "outline"}
+              size="sm"
+              onClick={() => setViewMode("table")}
+              className={`flex items-center space-x-2 ${
+                viewMode === "table"
+                  ? "bg-blue-600 hover:bg-blue-700 text-white"
+                  : "border-gray-300 text-gray-700 hover:bg-gray-50"
+              }`}
+            >
+              <Table className="h-4 w-4" />
+              <span>Table View</span>
+            </Button>
+            <Button
+              variant={viewMode === "calendar" ? "primary" : "outline"}
+              size="sm"
+              onClick={() => setViewMode("calendar")}
+              className={`flex items-center space-x-2 ${
+                viewMode === "calendar"
+                  ? "bg-blue-600 hover:bg-blue-700 text-white"
+                  : "border-gray-300 text-gray-700 hover:bg-gray-50"
+              }`}
+            >
+              <Grid className="h-4 w-4" />
+              <span>Calendar View</span>
+            </Button>
+          </div>
+        </div>
+
         {filteredSchedules?.length === 0 ? (
           <div className="text-center py-8">
             <Calendar className="h-12 w-12 text-gray-400 mx-auto mb-4" />
@@ -354,163 +392,80 @@ const StaffSchedules = () => {
             </Button>
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
-                <tr>
-                  {[
-                    { key: "staffName", label: "Staff" },
-                    { key: "startTime", label: "Start Time" },
-                    { key: "endTime", label: "End Time" },
-                    { key: "type", label: "Type" },
-                    { key: "status", label: "Status" },
-                    { key: "notes", label: "Notes" },
-                    { key: "actions", label: "Actions" },
-                  ].map((column) => (
-                    <th
-                      key={column.key}
-                      className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                    >
-                      {column.label}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {paginatedSchedules.map((schedule, index) => (
-                  <tr
-                    key={schedule.id}
-                    className={`hover:bg-gray-50 ${
-                      index % 2 === 0 ? "bg-white" : "bg-gray-50"
-                    }`}
-                  >
-                    <td className="px-4 py-3 whitespace-nowrap">
-                      <div className="flex items-center">
-                        <UserCheck className="h-4 w-4 text-gray-400 mr-2" />
-                        <span className="text-sm text-gray-900">
-                          {schedule.staffName}
-                        </span>
-                      </div>
-                    </td>
-                    <td className="px-4 py-3 whitespace-nowrap">
-                      <div className="flex items-center text-sm text-gray-600">
-                        <Clock className="h-4 w-4 mr-1" />
-                        {new Date(schedule.startTime).toLocaleString()}
-                      </div>
-                    </td>
-                    <td className="px-4 py-3 whitespace-nowrap">
-                      <div className="flex items-center text-sm text-gray-600">
-                        <Clock className="h-4 w-4 mr-1" />
-                        {schedule.endTime
-                          ? new Date(schedule.endTime).toLocaleString()
-                          : addHours(
-                              new Date(schedule.startTime),
-                              1
-                            ).toLocaleString()}
-                      </div>
-                    </td>
-                    <td className="px-4 py-3 whitespace-nowrap">
-                      <Badge className={getTypeColor(schedule.type)}>
-                        {
-                          scheduleTypes.find((t) => t.value === schedule.type)
-                            ?.label
-                        }
-                      </Badge>
-                    </td>
-                    <td className="px-4 py-3 whitespace-nowrap">
-                      <Badge
-                        className={
-                          new Date(
-                            schedule.endTime ||
-                              addHours(new Date(schedule.startTime), 1)
-                          ) < new Date() && schedule.status === "scheduled"
-                            ? getStatusColor("no_show")
-                            : getStatusColor(schedule.status)
-                        }
-                      >
-                        {new Date(
-                          schedule.endTime ||
-                            addHours(new Date(schedule.startTime), 1)
-                        ) < new Date() && schedule.status === "scheduled"
-                          ? "No Show"
-                          : scheduleStatuses.find(
-                              (s) => s.value === schedule.status
-                            )?.label}
-                      </Badge>
-                    </td>
-                    <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-600">
-                      {schedule.notes || "N/A"}
-                    </td>
-                    <td className="px-4 py-3 whitespace-nowrap text-sm">
-                      <div className="flex space-x-2">
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => {
-                            const start = new Date(schedule.startTime);
-                            const end = schedule.endTime
-                              ? new Date(schedule.endTime)
-                              : addHours(start, 1);
-                            setSelectedSchedule(schedule);
-                            setScheduleForm({
-                              studentId: schedule.studentId,
-                              staffId: schedule.staffId,
-                              startTime: start.toISOString().slice(0, 16),
-                              endTime: end.toISOString().slice(0, 16),
-                              type: schedule.type,
-                              status: schedule.status,
-                              notes: schedule.notes,
-                            });
-                            setShowEditModal(true);
-                          }}
-                          //   disabled={!hasPermission("edit", "schedules")}
-                          className="border-blue-300 text-blue-600 hover:bg-blue-50"
-                        >
-                          <Edit className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => openDeleteModal(schedule)}
-                          className="border-red-300 text-red-600 hover:bg-red-50"
-                          //   disabled={!hasPermission("delete", "schedules")}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-            {/* Pagination */}
-            {totalPages > 1 && (
-              <div className="mt-4 flex justify-between items-center">
-                <Button
-                  variant="outline"
-                  onClick={() =>
-                    setCurrentPage((prev) => Math.max(prev - 1, 1))
-                  }
-                  disabled={currentPage === 1}
-                  className="border-gray-300 text-gray-700 hover:bg-gray-50"
-                >
-                  Previous
-                </Button>
-                <span className="text-sm text-gray-600">
-                  Page {currentPage} of {totalPages}
-                </span>
-                <Button
-                  variant="outline"
-                  onClick={() =>
-                    setCurrentPage((prev) => Math.min(prev + 1, totalPages))
-                  }
-                  disabled={currentPage === totalPages}
-                  className="border-gray-300 text-gray-700 hover:bg-gray-50"
-                >
-                  Next
-                </Button>
-              </div>
+          <>
+            {/* Table View */}
+            {viewMode === "table" && (
+              <ScheduleTableView
+                schedules={paginatedSchedules}
+                onView={(schedule) => {
+                  setSelectedSchedule(schedule);
+                  setShowViewModal(true);
+                }}
+                onEdit={(schedule) => {
+                  const start = new Date(schedule.startTime);
+                  const end = schedule.endTime
+                    ? new Date(schedule.endTime)
+                    : addHours(start, 1);
+                  setSelectedSchedule(schedule);
+                  setScheduleForm({
+                    studentId: schedule.studentId,
+                    staffId: schedule.staffId,
+                    startTime: start.toISOString().slice(0, 16),
+                    endTime: end.toISOString().slice(0, 16),
+                    type: schedule.type,
+                    status: schedule.status,
+                    notes: schedule.notes,
+                  });
+                  setShowEditModal(true);
+                }}
+                onDelete={openDeleteModal}
+                getTypeColor={getTypeColor}
+                getStatusColor={getStatusColor}
+                loading={loading}
+              />
             )}
+
+            {/* Calendar View */}
+            {viewMode === "calendar" && (
+              <ScheduleCalendarView
+                schedules={filteredSchedules}
+                onScheduleClick={(schedule) => {
+                  setSelectedSchedule(schedule);
+                  setShowViewModal(true);
+                }}
+                getTypeColor={getTypeColor}
+                getStatusColor={getStatusColor}
+              />
+            )}
+          </>
+        )}
+
+        {/* Pagination for Table View */}
+        {viewMode === "table" && totalPages > 1 && (
+          <div className="mt-4 flex justify-between items-center">
+            <Button
+              variant="outline"
+              onClick={() =>
+                setCurrentPage((prev) => Math.max(prev - 1, 1))
+              }
+              disabled={currentPage === 1}
+              className="border-gray-300 text-gray-700 hover:bg-gray-50"
+            >
+              Previous
+            </Button>
+            <span className="text-sm text-gray-600">
+              Page {currentPage} of {totalPages}
+            </span>
+            <Button
+              variant="outline"
+              onClick={() =>
+                setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+              }
+              disabled={currentPage === totalPages}
+              className="border-gray-300 text-gray-700 hover:bg-gray-50"
+            >
+              Next
+            </Button>
           </div>
         )}
       </Card>
@@ -905,6 +860,18 @@ const StaffSchedules = () => {
         onClose={() => setShowDeleteModal(false)}
         onConfirm={handleDeleteSchedule}
         staffName={scheduleToDelete?.staffName}
+      />
+
+      {/* Schedule Detail Modal */}
+      <ScheduleDetailModal
+        isOpen={showViewModal}
+        onClose={() => {
+          setShowViewModal(false);
+          setSelectedSchedule(null);
+        }}
+        schedule={selectedSchedule}
+        getTypeColor={getTypeColor}
+        getStatusColor={getStatusColor}
       />
     </div>
   );

@@ -79,6 +79,9 @@ const ApplicationProgress = lazy(() =>
 const ApplicationsPage = lazy(() =>
   import("../pages/consultant/ApplicationsPage")
 );
+const CalendarAppointments = lazy(() =>
+  import("../pages/consultant/CalendarAppointments")
+);
 const MeetingScheduler = lazy(() =>
   import("../pages/consultant/MeetingScheduler")
 );
@@ -334,6 +337,11 @@ export const routes = [
   {
     path: "/consultant/applications",
     component: ApplicationsPage,
+    roles: ["consultant"],
+  },
+  {
+    path: "/consultant/calendar-appointments",
+    component: CalendarAppointments,
     roles: ["consultant"],
   },
   {
